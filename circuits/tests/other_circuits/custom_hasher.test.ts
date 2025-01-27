@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import path from 'path';
 import { wasm as wasm_tester } from 'circom_tester';
-import { customHasher } from '../../../common/src/utils/pubkeyTree';
-import { formatInput } from '../../../common/src/utils/generateInputs';
+import { formatInput } from '../../../common/src/utils/circuits/generateInputs';
+import { customHasher } from '../../../common/src/utils/hash';
 
 describe('CustomHasher', function () {
   this.timeout(0);

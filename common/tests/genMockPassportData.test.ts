@@ -1,8 +1,8 @@
 import { assert, expect } from 'chai';
 import { describe, it } from 'mocha';
-import { genMockPassportData } from '../src/utils/genMockPassportData';
+import { genMockPassportData } from '../src/utils/passports/genMockPassportData';
 import { PassportData, SignatureAlgorithm } from '../src/utils/types';
-import { parsePassportData } from '../src/utils/parsePassportData';
+import { parsePassportData } from '../src/utils/passport_parsing/parsePassportData';
 
 const testCases = [
   { dgHashAlgo: 'sha1', eContentHashAlgo: 'sha1', sigAlg: 'rsa_sha1_65537_2048' },

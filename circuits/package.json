@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "test": "yarn ts-mocha --max-old-space-size=8192 'tests/**/*.test.ts' 'tests/*.test.ts' --exit",
-    "test-dsc": "yarn ts-mocha --max-old-space-size=8192 'tests/dsc.test.ts' --exit",
-    "test-prove": "yarn ts-mocha --max-old-space-size=40960 'tests/prove.test.ts' --exit",
+    "test-dsc": "yarn ts-mocha --max-old-space-size=8192 'tests/dsc/dsc.test.ts' --exit",
+    "test-register": "yarn ts-mocha --max-old-space-size=40960 'tests/register/register.test.ts' --exit",
     "test-rsa": "yarn ts-mocha --max-old-space-size=8192 'tests/utils/rsaPkcs1v1_5.test.ts' --exit",
     "test-rsa-pss": "yarn ts-mocha --max-old-space-size=8192 'tests/utils/rsapss.test.ts' --exit",
     "test-ecdsa": "yarn ts-mocha --max-old-space-size=8192 'tests/utils/ecdsa.test.ts' --exit",

@@ -28,6 +28,7 @@ export function parseCertificateSimple(pem: string): CertificateData {
     publicKeyDetails: undefined,
     rawPem: '',
     rawTxt: '',
+    publicKeyAlgoOID: '',
   };
   try {
     const pemFormatted = pem.replace(/(-----(BEGIN|END) CERTIFICATE-----|\n|\r)/g, '');
@@ -49,6 +50,7 @@ export function parseCertificateSimple(pem: string): CertificateData {
     const signatureAlgoOID = cert.signatureAlgorithm.algorithmId;
     const signatureAlgoFN = getFriendlyName(signatureAlgoOID);
     certificateData.hashAlgorithm = getHashAlgorithm(signatureAlgoFN);
+    certificateData.publicKeyAlgoOID = publicKeyAlgoOID;
     let params;
     if (publicKeyAlgoFN === 'RSA') {
       certificateData.signatureAlgorithm = 'rsa';

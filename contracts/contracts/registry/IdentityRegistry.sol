@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "../proxy/PrivacyIDProxy.sol";
+import "../proxy/ProxyRoot.sol";
 
-contract IdentifyCommitmentRegistry is PrivacyIDProxy {
-    constructor(address _logic, bytes memory _data) PrivacyIDProxy(_logic, _data) {}
+contract IdentityRegistry is ProxyRoot {
+    constructor(address _logic, bytes memory _data) ProxyRoot(_logic, _data) {}
 }

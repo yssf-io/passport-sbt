@@ -18,6 +18,7 @@ export interface CertificateData {
     | undefined;
   rawPem: string;
   rawTxt: string;
+  publicKeyAlgoOID?: string;
 }
 
 export interface PublicKeyDetailsRSA {

@@ -4,13 +4,16 @@ pragma solidity ^0.8.28;
 interface IVcAndDiscloseCircuitVerifier {
 
     struct VcAndDiscloseProof {
-        uint[2] pA;
-        uint[2][2] pB;
-        uint[2] pC;
-        uint[20] pubSignals;
+        uint[2] a;
+        uint[2][2] b;
+        uint[2] c;
+        uint[16] pubSignals;
     }
 
     function verifyProof (
-        VcAndDiscloseProof memory proof
+        uint[2] calldata a,
+        uint[2][2] calldata b,
+        uint[2] calldata c,
+        uint[16] calldata pubSignals
     ) external view returns (bool);
 }

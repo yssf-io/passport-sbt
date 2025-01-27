@@ -6,32 +6,13 @@ import "./IDscCircuitVerifier.sol";
 import "./IVcAndDiscloseCircuitVerifier.sol";
 interface IIdentityVerificationHubV1 {
 
-    struct Dg1Attributes {
-        string issuingState;
-        string name;
-        string passportNumber;
-        string nationality;
-        string dateOfBirth;
-        string gender;
-        string expiryDate;
-    }
-
-    struct VcAndDiscloseVerificationMinimumResult {
-        uint256 attestationId;
-        uint256 scope;
-        uint256 userIdentifier;
-        uint256 nullifier;
-    }
-
-    struct VcAndDiscloseVerificationFullResult {
+    struct VcAndDiscloseVerificationResult {
         uint256 attestationId;
         uint256 scope;
         uint256 userIdentifier;
         uint256 nullifier;
         uint256[3] revealedDataPacked;
-        uint256 olderThan;
-        uint256[2] forbiddenCountriesList;
-        bool ofacResult;
+        uint256 forbiddenCountriesListPacked;
     }
 
     struct PassportProof {
@@ -41,13 +22,11 @@ interface IIdentityVerificationHubV1 {
         IDscCircuitVerifier.DscCircuitProof dscCircuitProof;
     }
 
-    struct VcAndDiscloseHubProof {
-        bool olderThanEnabled;
-        uint256 olderThan;
-        bool forbiddenCountriesEnabled;
-        uint256[2] forbiddenCountriesList;
-        bool ofacEnabled;
-        IVcAndDiscloseCircuitVerifier.VcAndDiscloseProof vcAndDiscloseProof;
-    }
+    function verifyVcAndDiscloseAndGetResult(
+        IVcAndDiscloseCircuitVerifier.VcAndDiscloseProof memory proof
+    )
+        external
+        view
+        returns (VcAndDiscloseVerificationResult memory);
 
 } 

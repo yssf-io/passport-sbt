@@ -1,5 +1,4 @@
-import { DEFAULT_USER_ID_TYPE, WEBSOCKET_URL } from '../constants/constants';
-import { UserIdType } from './utils';
+import { UserIdType } from "./circuits/uuid";
 
 export type CircuitName = 'prove' | 'disclose';
 export type CircuitMode = 'prove_onchain' | 'register' | 'prove_offchain';

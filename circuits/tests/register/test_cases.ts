@@ -1,13 +1,13 @@
 export const sigAlgs = [
-  {
-    dgHashAlgo: 'sha256',
-    eContentHashAlgo: 'sha256',
-    sigAlg: 'rsapss',
-    hashFunction: 'sha256',
-    domainParameter: '3',
-    keyLength: '3072',
-    checkNullifier: true,
-  },
+  // {
+  //   dgHashAlgo: 'sha256',
+  //   eContentHashAlgo: 'sha256',
+  //   sigAlg: 'rsapss',
+  //   hashFunction: 'sha256',
+  //   domainParameter: '3',
+  //   keyLength: '3072',
+  //   checkNullifier: true,
+  // },
   {
     dgHashAlgo: 'sha1',
     eContentHashAlgo: 'sha256',
@@ -15,15 +15,17 @@ export const sigAlgs = [
     hashFunction: 'sha256',
     domainParameter: '65537',
     keyLength: '2048',
+    checkNullifier: true,
   },
-  {
-    dgHashAlgo: 'sha256',
-    eContentHashAlgo: 'sha224',
-    sigAlg: 'ecdsa',
-    hashFunction: 'sha224',
-    domainParameter: 'brainpoolP224r1',
-    keyLength: '224',
-  },
+  // {
+  //   dgHashAlgo: 'sha256',
+  //   eContentHashAlgo: 'sha224',
+  //   sigAlg: 'ecdsa',
+  //   hashFunction: 'sha224',
+  //   domainParameter: 'brainpoolP224r1',
+  //   keyLength: '224',
+  //   checkNullifier: true,
+  // },
 ];
 
 export const fullSigAlgs = [
@@ -34,6 +36,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha1',
     domainParameter: 'secp256r1',
     keyLength: '256',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha512',
@@ -42,6 +45,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha512',
     domainParameter: '65537',
     keyLength: '4096',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha1',
@@ -50,7 +54,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha1',
     domainParameter: '65537',
     keyLength: '2048',
-    checkNullifier: true,
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -59,6 +63,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: '65537',
     keyLength: '2048',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -67,6 +72,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: '65537',
     keyLength: '2048',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -75,6 +81,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: '65537',
     keyLength: '3072',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -83,6 +90,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: '65537',
     keyLength: '4096',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -91,6 +99,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: '3',
     keyLength: '4096',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -99,6 +108,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: '3',
     keyLength: '3072',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -107,6 +117,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: '3',
     keyLength: '2048',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -115,6 +126,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: '65537',
     keyLength: '3072',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -123,6 +135,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: 'secp256r1',
     keyLength: '256',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha1',
@@ -131,6 +144,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha1',
     domainParameter: 'secp256r1',
     keyLength: '256',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -139,6 +153,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: 'brainpoolP256r1',
     keyLength: '256',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -147,6 +162,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: 'secp384r1',
     keyLength: '384',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha384',
@@ -155,6 +171,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha384',
     domainParameter: 'brainpoolP256r1',
     keyLength: '256',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha384',
@@ -163,6 +180,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha384',
     domainParameter: 'brainpoolP384r1',
     keyLength: '384',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha384',
@@ -171,6 +189,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha384',
     domainParameter: 'secp384r1',
     keyLength: '384',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha512',
@@ -179,6 +198,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha512',
     domainParameter: 'brainpoolP256r1',
     keyLength: '256',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -187,6 +207,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha224',
     domainParameter: 'brainpoolP224r1',
     keyLength: '224',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -195,6 +216,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: 'brainpoolP224r1',
     keyLength: '224',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha1',
@@ -203,6 +225,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha1',
     domainParameter: 'brainpoolP224r1',
     keyLength: '224',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha256',
@@ -211,6 +234,7 @@ export const fullSigAlgs = [
     hashFunction: 'sha256',
     domainParameter: 'secp256r1',
     keyLength: '256',
+    checkNullifier: false,
   },
   {
     dgHashAlgo: 'sha512',
@@ -219,5 +243,6 @@ export const fullSigAlgs = [
     hashFunction: 'sha512',
     domainParameter: 'brainpoolP512r1',
     keyLength: '512',
+    checkNullifier: false,
   },
 ];

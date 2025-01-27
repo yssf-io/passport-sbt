@@ -18,7 +18,6 @@ const config: HardhatUserConfig = {
           yul: true
         }
       },
-
       metadata: {
         bytecodeHash: "none"
       },

@@ -2,13 +2,14 @@
 pragma solidity ^0.8.28;
 
 library Formatter {
-
     error InvalidDateLength();
     error InvalidAsciiCode();
 
-    uint256 constant FORBIDDEN_COUNTRIES_LIST_LENGTH = 20;
+    uint256 constant MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH = 20;
 
-    function formatName(string memory input) internal pure returns (string[] memory) {
+    function formatName(
+        string memory input
+    ) internal pure returns (string[] memory) {
         bytes memory inputBytes = bytes(input);
         bytes memory firstNameBytes;
         bytes memory lastNameBytes;
@@ -16,7 +17,7 @@ library Formatter {
 
         uint i = 0;
         // Extract last name
-        while(i < inputBytes.length && inputBytes[i] != '<') {
+        while (i < inputBytes.length && inputBytes[i] != "<") {
             lastNameBytes = abi.encodePacked(lastNameBytes, inputBytes[i]);
             i++;
         }
@@ -25,14 +26,17 @@ library Formatter {
         i += 2;
 
         // Extract first names
-        while(i < inputBytes.length) {
-            if(inputBytes[i] == '<') {
-                if (i + 1 < inputBytes.length && inputBytes[i + 1] == '<') {
+        while (i < inputBytes.length) {
+            if (inputBytes[i] == "<") {
+                if (i + 1 < inputBytes.length && inputBytes[i + 1] == "<") {
                     break;
                 }
-                firstNameBytes = abi.encodePacked(firstNameBytes, ' ');
+                firstNameBytes = abi.encodePacked(firstNameBytes, " ");
             } else {
-                firstNameBytes = abi.encodePacked(firstNameBytes, inputBytes[i]);
+                firstNameBytes = abi.encodePacked(
+                    firstNameBytes,
+                    inputBytes[i]
+                );
             }
             i++;
         }
@@ -42,19 +46,21 @@ library Formatter {
         return names;
     }
 
-    function formatDate(string memory date) internal pure returns (string memory) {
-		// Ensure the date string is the correct length
+    function formatDate(
+        string memory date
+    ) internal pure returns (string memory) {
+        // Ensure the date string is the correct length
         if (bytes(date).length != 6) {
             revert InvalidDateLength();
         }
 
-		string memory year = substring(date, 0, 2);
-		string memory month = substring(date, 2, 4);
-		string memory day = substring(date, 4, 6);
+        string memory year = substring(date, 0, 2);
+        string memory month = substring(date, 2, 4);
+        string memory day = substring(date, 4, 6);
 
-		return string(abi.encodePacked(day, "-", month, "-", year));
-	}
-    
+        return string(abi.encodePacked(day, "-", month, "-", year));
+    }
+
     function numAsciiToUint(uint256 numAscii) internal pure returns (uint256) {
         if (numAscii < 48 || numAscii > 57) {
             revert InvalidAsciiCode();
@@ -65,8 +71,8 @@ library Formatter {
     function fieldElementsToBytes(
         uint256[3] memory publicSignals
     ) internal pure returns (bytes memory) {
-        uint8[3] memory bytesCount = [31, 31, 28];
-        bytes memory bytesArray = new bytes(90);
+        uint8[3] memory bytesCount = [31, 31, 29];
+        bytes memory bytesArray = new bytes(91);
 
         uint256 index = 0;
         for (uint256 i = 0; i < 3; i++) {
@@ -81,9 +87,15 @@ library Formatter {
 
     function extractForbiddenCountriesFromPacked(
         uint256[2] memory publicSignals
-    ) internal pure returns (bytes3[FORBIDDEN_COUNTRIES_LIST_LENGTH] memory forbiddenCountries) {
-
-        for (uint256 j = 0; j < FORBIDDEN_COUNTRIES_LIST_LENGTH; j++) {
+    )
+        internal
+        pure
+        returns (
+            bytes3[MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH]
+                memory forbiddenCountries
+        )
+    {
+        for (uint256 j = 0; j < MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH; j++) {
             uint256 byteIndex = j * 3;
 
             if (byteIndex + 2 < 32) {
@@ -121,7 +133,7 @@ library Formatter {
         uint256[6] memory dateNum
     ) internal pure returns (uint256) {
         string memory date = "";
-        for (uint256 i = 0; i  < 6; i++) {
+        for (uint256 i = 0; i < 6; i++) {
             date = string(
                 abi.encodePacked(date, bytes1(uint8(48 + (dateNum[i] % 10))))
             );
@@ -144,16 +156,20 @@ library Formatter {
         return toTimestamp(year, month, day);
     }
 
-    function substring(string memory str, uint startIndex, uint endIndex) internal pure returns (string memory) {
-		bytes memory strBytes = bytes(str);
-		bytes memory result = new bytes(endIndex - startIndex);
+    function substring(
+        string memory str,
+        uint startIndex,
+        uint endIndex
+    ) internal pure returns (string memory) {
+        bytes memory strBytes = bytes(str);
+        bytes memory result = new bytes(endIndex - startIndex);
 
-		for(uint i = startIndex; i < endIndex; i++) {
-			result[i - startIndex] = strBytes[i];
-		}
+        for (uint i = startIndex; i < endIndex; i++) {
+            result[i - startIndex] = strBytes[i];
+        }
 
-		return string(result);
-	}
+        return string(result);
+    }
 
     // Helper function to convert a string to an integer
     function parseDatePart(string memory value) internal pure returns (uint) {
@@ -172,7 +188,11 @@ library Formatter {
     }
 
     // Convert date to Unix timestamp
-    function toTimestamp(uint256 year, uint256 month, uint256 day) internal pure returns (uint timestamp) {
+    function toTimestamp(
+        uint256 year,
+        uint256 month,
+        uint256 day
+    ) internal pure returns (uint timestamp) {
         uint16 i;
 
         // Year
@@ -226,14 +246,15 @@ library Formatter {
         }
     }
 
-
-    function formatAge(string memory age) internal pure returns (string memory) {
+    function formatAge(
+        string memory age
+    ) internal pure returns (string memory) {
         // if it's an empty two bytes string, just show N/A
-        return bytes(age).length == 2
-            && bytes(age)[0] == 0x00
-            && bytes(age)[1] == 0x00
-            ? "N/A"
-            : age;
+        return
+            bytes(age).length == 2 &&
+                bytes(age)[0] == 0x00 &&
+                bytes(age)[1] == 0x00
+                ? "N/A"
+                : age;
     }
-
 }

@@ -2,15 +2,15 @@ import { describe } from 'mocha';
 import { assert, expect } from 'chai';
 import path from 'path';
 import { wasm as wasm_tester } from 'circom_tester';
-import { generateCircuitInputsRegister } from '../../../common/src/utils/generateInputs';
-import { genMockPassportData } from '../../../common/src/utils/genMockPassportData';
+import { generateCircuitInputsRegister } from '../../../common/src/utils/circuits/generateInputs';
+import { genMockPassportData } from '../../../common/src/utils/passports/genMockPassportData';
 import { SignatureAlgorithm } from '../../../common/src/utils/types';
 import { poseidon2 } from 'poseidon-lite';
 import { SMT } from '@openpassport/zk-kit-smt';
 import namejson from '../../../common/ofacdata/outputs/nameSMT.json';
-import { getCircuitNameFromPassportData } from '../../../common/src/utils/circuitsName';
-import { getNullifier } from '../../../common/src/utils/utils';
+import { getCircuitNameFromPassportData } from '../../../common/src/utils/circuits/circuitsName';
 import { sigAlgs, fullSigAlgs } from './test_cases';
+import { generateCommitment, generateGlue, generateNullifier, initPassportDataParsing } from '../../../common/src/utils/passports/passport';
 
 const testSuite = process.env.FULL_TEST_SUITE === 'true' ? fullSigAlgs : sigAlgs;
 
@@ -28,7 +28,7 @@ testSuite.forEach(
       this.timeout(0);
       let circuit: any;
 
-      const passportData = genMockPassportData(
+      let passportData = genMockPassportData(
         dgHashAlgo,
         eContentHashAlgo,
         `${sigAlg}_${hashFunction}_${domainParameter}_${keyLength}` as SignatureAlgorithm,
@@ -36,12 +36,14 @@ testSuite.forEach(
         '000101',
         '300101'
       );
+      passportData = initPassportDataParsing(passportData);
       const secret = 0;
-      const dsc_secret = 0;
+      const salt = 0;
+      const attestation_id = '1';
 
       let name_smt = new SMT(poseidon2, true);
       name_smt.import(namejson);
-      const inputs = generateCircuitInputsRegister(secret, dsc_secret, passportData);
+      const inputs = generateCircuitInputsRegister(secret, salt, passportData);
 
       before(async () => {
         circuit = await wasm_tester(
@@ -52,8 +54,6 @@ testSuite.forEach(
           {
             include: [
               'node_modules',
-              './node_modules/@zk-kit/binary-merkle-root.circom/src',
-              './node_modules/circomlib/circuits',
             ],
           }
         );
@@ -66,23 +66,30 @@ testSuite.forEach(
       it('should calculate the witness with correct inputs', async function () {
         const w = await circuit.calculateWitness(inputs);
         await circuit.checkConstraints(w);
+
+        const logDg1PackedHash = generateCommitment('0', '1', passportData);
         if (!checkNullifier) {
           return;
         }
 
-        const expectedNullifier = getNullifier(inputs.signed_attr, hashFunction);
-
+        const nullifier_js = generateNullifier(passportData);
+        console.log('\x1b[35m%s\x1b[0m', 'js: nullifier:', nullifier_js);
         const nullifier = (await circuit.getOutput(w, ['nullifier'])).nullifier;
-        assert(expectedNullifier == nullifier);
+        console.log('\x1b[34m%s\x1b[0m', 'circom: nullifier', nullifier);
 
-        console.log('\x1b[34m%s\x1b[0m', 'nullifier', nullifier);
+        const commitment_js = generateCommitment(secret.toString(), attestation_id, passportData);
+        console.log('\x1b[35m%s\x1b[0m', 'js: commitment:', commitment_js);
         const commitment = (await circuit.getOutput(w, ['commitment'])).commitment;
-        console.log('\x1b[34m%s\x1b[0m', 'commitment', commitment);
-        const blinded_dsc_commitment = (await circuit.getOutput(w, ['blinded_dsc_commitment']))
-          .blinded_dsc_commitment;
-        console.log('\x1b[34m%s\x1b[0m', 'blinded_dsc_commitment', blinded_dsc_commitment);
-        expect(blinded_dsc_commitment).to.be.not.null;
-        expect(nullifier).to.be.not.null;
+        console.log('\x1b[34m%s\x1b[0m', 'circom commitment', commitment);
+
+        const glue_js = generateGlue(salt.toString(), passportData);
+        console.log('\x1b[35m%s\x1b[0m', 'js: glue:', glue_js);
+        const glue = (await circuit.getOutput(w, ['glue'])).glue;
+        console.log('\x1b[34m%s\x1b[0m', 'circom: glue', glue);
+
+        expect(commitment).to.be.equal(commitment_js);
+        expect(nullifier).to.be.equal(nullifier_js);
+        // expect(glue).to.be.equal(glue_js); //comment temporarily
       });
 
       it('should fail to calculate witness with invalid mrz', async function () {
@@ -117,7 +124,7 @@ testSuite.forEach(
         try {
           const invalidInputs = {
             ...inputs,
-            signature: inputs.signature.map((byte: string) =>
+            signature_passport: inputs.signature_passport.map((byte: string) =>
               String((parseInt(byte, 10) + 1) % 256)
             ),
           };

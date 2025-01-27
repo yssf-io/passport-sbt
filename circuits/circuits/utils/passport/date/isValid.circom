@@ -4,6 +4,13 @@ include "circomlib/circuits/comparators.circom";
 include "circomlib/circuits/bitify.circom";
 include "./dateIsLess.circom";
 
+/// @title IsValid
+/// @notice Verifies if the passport is valid at the current date
+/// @param currDate Current date: YYMMDD — number
+/// @param validityDateASCII Validity date: YYMMDD — ASCII
+/// @output out Result of the comparison
+/// @dev output is constrained
+
 template IsValid() {
     signal input currDate[6];
     signal input validityDateASCII[6];

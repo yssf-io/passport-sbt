@@ -17,6 +17,7 @@ export function parseCertificate(pem: string, fileName: string): any {
     publicKeyDetails: undefined,
     rawPem: '',
     rawTxt: '',
+    publicKeyAlgoOID: '',
   };
   try {
     certificateData = parseCertificateSimple(pem);

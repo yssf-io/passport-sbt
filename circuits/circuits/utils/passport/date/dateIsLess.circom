@@ -2,6 +2,17 @@ pragma circom 2.1.9;
 
 include "circomlib/circuits/comparators.circom";
 
+/// @title DateIsLess
+/// @notice compares two dates in the YMD numeric format
+/// @param firstDay day of the first date
+/// @param secondDay day of the second date
+/// @param firstMonth month of the first date
+/// @param secondMonth month of the second date
+/// @param firstYear year of the first date
+/// @param secondYear year of the second date
+/// @output out Result of the comparison
+/// @dev output is not constrained — verifier has to handle this check
+
 template DateIsLess() {
     signal input firstDay;
     signal input secondDay;

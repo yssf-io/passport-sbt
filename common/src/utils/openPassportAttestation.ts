@@ -1,14 +1,8 @@
 import { ECDSA_K_LENGTH_FACTOR, k_dsc, k_dsc_ecdsa } from '../constants/constants';
-import {
-  bigIntToHex,
-  castToScope,
-  castToUUID,
-  formatForbiddenCountriesListFromCircuitOutput,
-  UserIdType,
-} from './utils';
-import { unpackReveal } from './revealBitmap';
-import { getAttributeFromUnpackedReveal } from './utils';
 import { Mode } from 'fs';
+import { bigIntToHex, castToScope, castToUUID, UserIdType } from './circuits/uuid';
+import { formatForbiddenCountriesListFromCircuitOutput, getAttributeFromUnpackedReveal } from './circuits/formatOutputs';
+import { unpackReveal } from './circuits/formatOutputs';
 
 export interface OpenPassportAttestation {
   '@context': string[];

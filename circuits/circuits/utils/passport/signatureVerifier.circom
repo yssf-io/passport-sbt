@@ -7,6 +7,15 @@ include "../crypto/signature/rsa/verifyRsa3Pkcs1v1_5.circom";
 include "../crypto/signature/rsa/verifyRsa65537Pkcs1v1_5.circom";
 include "@openpassport/zk-email-circuits/utils/bytes.circom";
 
+/// @title SignatureVerifier
+/// @notice verifies signature — routes to the correct signature verification circuit according to the signature algorithm ID
+/// @param signatureAlgorithm ID of the signature algorithm
+/// @param n Number of bits per chunk the key is split into.
+/// @param k Number of chunks the key is split into.
+/// @input hash Hash of the data to verify
+/// @input pubKey Public key for signature verification
+/// @input signature Signature to verify
+
 template SignatureVerifier(signatureAlgorithm, n, k) {
     var kLengthFactor = getKLengthFactor(signatureAlgorithm);
     var kScaled = k * kLengthFactor;
@@ -16,7 +25,6 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
     signal input hash[HASH_LEN_BITS];
     signal input pubKey[kScaled];
     signal input signature[kScaled];
-
 
     var msg_len = (HASH_LEN_BITS + n) \ n;
 

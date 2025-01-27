@@ -15,12 +15,15 @@ describe('DateIsLessChecker Circuit Test', function () {
    *  yearStart: start year for random current dates
    *  yearEnd: end year for random current dates
    *
-   *  According to circuit logic, user has to be majority years and 1 day old to be major
+   *  According to circuit logic, user has to be majority years and 1 day old to reach majority age
    *
    */
 
   const n = 10;
-  const majority = 18;
+  const majority = 19;
+  const majority_input_raw = majority.toString().split('').map(char => char.charCodeAt(0))
+  const majority_input = majority_input_raw.length == 1 ? [48, majority_input_raw[0]] : majority_input_raw;
+  console.log(majority_input);
 
   const yearStart = 2023;
   const yearEnd = 2200;
@@ -82,7 +85,7 @@ describe('DateIsLessChecker Circuit Test', function () {
     majorityBirthDates.forEach((date, index) => {
       it(`majority check for birthdate ${genDateStr(majorityBirthDates[index])} and current date ${genDateStr(currentDates[index])} and age: ${getAgeFromDates(majorityBirthDates[index], currentDates[index])}`, async function () {
         const inputs = {
-          majority: [49, 56],
+          majority: majority_input,
           currDate: [
             Math.floor(currentDates[index].year / 10) % 10,
             currentDates[index].year % 10,
@@ -116,7 +119,7 @@ describe('DateIsLessChecker Circuit Test', function () {
     minorityBirthDates.forEach((date, index) => {
       it(`minority check for birthdate ${genDateStr(minorityBirthDates[index])} and current date ${genDateStr(currentDates[index])} and age: ${getAgeFromDates(minorityBirthDates[index], currentDates[index])}`, async function () {
         const inputs = {
-          majority: [49, 58],
+          majority: majority_input,
           currDate: [
             Math.floor(currentDates[index].year / 10) % 10,
             currentDates[index].year % 10,

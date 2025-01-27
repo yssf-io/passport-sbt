@@ -15,7 +15,7 @@ import {
   OpenPassportApp,
 } from '../../../common/src/utils/appType';
 import {
-  generateCircuitInputsDisclose,
+  generateCircuitInputsVCandDisclose,
   generateCircuitInputsProve,
 } from '../../../common/src/utils/generateInputs';
 import { fetchTreeFromUrl } from '../../../common/src/utils/pubkeyTree';
@@ -100,7 +100,7 @@ export const generateCircuitInputsInApp = async (
         disclosureOptionsDisclose.excludedCountries.value.map(country =>
           getCountryCode(country),
         );
-      return generateCircuitInputsDisclose(
+      return generateCircuitInputsVCandDisclose(
         secret,
         PASSPORT_ATTESTATION_ID,
         passportData,

@@ -1,3 +1,5 @@
+import { PassportMetadata } from "./passports/passport_parsing/parsePassportData";
+
 export type PassportData = {
   mrz: string;
   dg1Hash?: number[];
@@ -9,6 +11,10 @@ export type PassportData = {
   encryptedDigest: number[];
   photoBase64: string;
   mockUser?: boolean;
+  parsed: boolean;
+  passportMetadata?: PassportMetadata;
+  dsc_parsed?: any;
+  csca_parsed?: any;
 };
 
 // Define the signature algorithm in "algorithm_hashfunction_domainPapameter_keyLength"

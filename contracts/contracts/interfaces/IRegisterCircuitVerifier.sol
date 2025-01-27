@@ -11,6 +11,9 @@ interface IRegisterCircuitVerifier {
     }
 
     function verifyProof (
-        RegisterCircuitProof calldata _proof
+        uint[2] calldata a,
+        uint[2][2] calldata b,
+        uint[2] calldata c,
+        uint[3] calldata pubSignals
     ) external view returns (bool);
 }
