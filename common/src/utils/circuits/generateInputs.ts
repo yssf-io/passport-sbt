@@ -33,53 +33,45 @@ import { generateMerkleProof, generateSMTProof } from '../trees';
 import { getCertificateFromPem, getTBSBytes, parseCertificateSimple } from '../certificate_parsing/parseCertificateSimple';
 import { findStartIndex, findStartIndexEC, getCSCAFromSKI, getCSCAModulusProof } from '../csca';
 import { PublicKeyDetailsECDSA, PublicKeyDetailsRSA } from '../certificate_parsing/dataStructure';
-import { getLeafCSCA } from '../pubkeyTree';
 import { parseDscCertificateData } from '../passports/passport_parsing/parseDscCertificateData';
+import { getLeafCscaTree } from '../pubkeyTree';
 
 export function generateCircuitInputsDSC(
   dscCertificate: string,
   devMode: boolean = false
 ) {
-  // Get CSCA that signed the DSC
-  const { authorityKeyIdentifier } = parseCertificateSimple(dscCertificate);
-  console.log('js: authorityKeyIdentifier', authorityKeyIdentifier);
-  const cscaPem = getCSCAFromSKI(authorityKeyIdentifier, devMode);
-  console.log('js: cscaPem', cscaPem);
-  const cscaCertData = parseCertificateSimple(cscaPem);
-  console.log('js: cscaCertData', cscaCertData);
-
-  const cscaTbsBytes = getTBSBytes(cscaPem);
-  console.log('js: cscaTbsBytes', cscaTbsBytes);
-  console.log('js: cscaTbsBytes length', cscaTbsBytes.length);
-  const cscaTbsBytesPadded = padWithZeroes(Array.from(cscaTbsBytes), max_csca_bytes); // TODO: change this to the actual hash algorithm
+  const dscParsed = parseCertificateSimple(dscCertificate);
+  const dscMetadata = parseDscCertificateData(dscParsed);
+  const cscaParsed = parseCertificateSimple(dscMetadata.csca);
+  const cscaTbsBytesPadded = padWithZeroes(Array.from(cscaParsed.tbsBytes), max_csca_bytes); // TODO: change this to the actual hash algorithm
   console.log('js: cscaTbsBytesPadded', cscaTbsBytesPadded);
   console.log('js: cscaTbsBytesPadded length', cscaTbsBytesPadded.length);
 
-  const dscTbsBytes = getTBSBytes(dscCertificate);
+  const dscTbsBytes = dscParsed.tbsBytes;
   console.log('js: dscTbsBytes', dscTbsBytes);
   console.log('js: dscTbsBytes length', dscTbsBytes.length);
   // const dscTbsBytesPadded = padWithZeroes(Array.from(dscTbsBytes), max_dsc_bytes);
   // console.log('js: dscTbsBytesPadded', dscTbsBytesPadded);
   // console.log('js: dscTbsBytesPadded length', dscTbsBytesPadded.length);
 
-  const [dscTbsBytesPadded, dscTbsBytesLen] = pad(cscaCertData.hashAlgorithm)( // do we want to keep this padding for the commitment? Not sure
+  const [dscTbsBytesPadded, dscTbsBytesLen] = pad(cscaParsed.hashAlgorithm)( // do we want to keep this padding for the commitment? Not sure
     dscTbsBytes,
     max_dsc_bytes
   );
   console.log('js: dscTbsBytesPadded', dscTbsBytesPadded);
   console.log('js: dscTbsBytesPadded length', dscTbsBytesPadded.length);
-  
+
   // TODO: get the CSCA inclusion proof
-  // const leaf = getLeafCSCA(cscaPem);
-  // const [root, proof] = getCSCAModulusProof(leaf);
+  const leaf = getLeafCscaTree(cscaParsed);
+  const [root, proof] = getCSCAModulusProof(leaf);
 
   // Parse CSCA certificate and get its public key
   const csca_pubKey_formatted = getCertificatePubKey(
-    cscaCertData,
-    cscaCertData.signatureAlgorithm,
-    cscaCertData.hashAlgorithm
+    cscaParsed,
+    cscaParsed.signatureAlgorithm,
+    cscaParsed.hashAlgorithm
   );
-  const modulus = (cscaCertData.publicKeyDetails as PublicKeyDetailsRSA).modulus;
+  const modulus = (cscaParsed.publicKeyDetails as PublicKeyDetailsRSA).modulus;
   const modulus_bytes = Array.from(Buffer.from(modulus, 'hex'));
   console.log('js: modulus_bytes', modulus_bytes);
   console.log('js: modulus_bytes[modulus_bytes.length - 1]', modulus_bytes[modulus_bytes.length - 1]);
@@ -88,21 +80,21 @@ export function generateCircuitInputsDSC(
   console.log('js: csca_pubKey_formatted', csca_pubKey_formatted);
   console.log('js: csca_pubKey_formatted length', csca_pubKey_formatted.length);
 
-  const csca_pubkey_length_bytes = Number(cscaCertData.publicKeyDetails.bits) / 8;
+  const csca_pubkey_length_bytes = Number(cscaParsed.publicKeyDetails.bits) / 8;
   console.log('js: csca_pubkey_length_bytes', csca_pubkey_length_bytes);
-  
+
   const signatureRaw = extractSignatureFromDSC(dscCertificate);
   // console.log('js: signatureRaw', signatureRaw);
-  const signature = formatSignatureDSCCircuit(cscaCertData.signatureAlgorithm, cscaCertData.hashAlgorithm, cscaCertData, signatureRaw,);
+  const signature = formatSignatureDSCCircuit(dscMetadata.cscaSignatureAlgorithm, dscMetadata.cscaHashAlgorithm, cscaParsed, signatureRaw,);
   // console.log('js: signature', signature);
 
   // Get start index of CSCA pubkey based on algorithm
-  const startIndex = findStartPubKeyIndex(cscaCertData, cscaTbsBytesPadded, cscaCertData.signatureAlgorithm);
+  const startIndex = findStartPubKeyIndex(cscaParsed, cscaTbsBytesPadded, cscaParsed.signatureAlgorithm);
   console.log('js: startIndex', startIndex);
 
   return {
     raw_csca: cscaTbsBytesPadded.map(x => x.toString()),
-    raw_csca_actual_length: [BigInt(cscaTbsBytes.length).toString()],
+    raw_csca_actual_length: [BigInt(cscaParsed.tbsBytes.length).toString()],
     csca_pubKey_offset: [startIndex.toString()],
     raw_dsc: Array.from(dscTbsBytesPadded).map(x => x.toString()),
     raw_dsc_actual_length: [BigInt(dscTbsBytesLen).toString()],

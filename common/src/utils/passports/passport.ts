@@ -1,12 +1,12 @@
 import { poseidon4, poseidon6 } from 'poseidon-lite';
-import { hashAlgos, MAX_PADDED_ECONTENT_LEN, MAX_PUBKEY_DSC_BYTES } from '../../constants/constants';
+import { hashAlgos, MAX_PUBKEY_DSC_BYTES } from '../../constants/constants';
 import {
     CertificateData,
     PublicKeyDetailsECDSA,
     PublicKeyDetailsRSA,
 } from '../certificate_parsing/dataStructure';
-import { getCertificateFromPem, getTBSBytes, parseCertificateSimple } from '../certificate_parsing/parseCertificateSimple';
-import { parsePassportData, PassportMetadata } from './passport_parsing/parsePassportData';
+import { getCertificateFromPem, parseCertificateSimple } from '../certificate_parsing/parseCertificateSimple';
+import { parsePassportData } from './passport_parsing/parsePassportData';
 import { shaPad } from '../shaPad';
 import { sha384_512Pad } from '../shaPad';
 import { PassportData, SignatureAlgorithm } from '../types';
@@ -214,9 +214,9 @@ export function formatCertificatePubKeyDSC(
     const { publicKeyDetails } = certificateData;
     if (signatureAlgorithm === 'ecdsa') {
         const { x, y } = publicKeyDetails as PublicKeyDetailsECDSA;
-        const normalizedX = x.length % 2 === 0 ? x : '0' + x;
-        const normalizedY = y.length % 2 === 0 ? y : '0' + y;
-        const fullPubKey = normalizedX + normalizedY;
+        // const normalizedX = x.length % 2 === 0 ? x : '0' + x;
+        // const normalizedY = y.length % 2 === 0 ? y : '0' + y;
+        const fullPubKey = x + y;
 
         // Splits to 525 words of 8 bits each
         return splitToWords(BigInt(hexToDecimal(fullPubKey)), 8, 525);
@@ -269,11 +269,8 @@ export function findStartPubKeyIndex(
     const { publicKeyDetails } = certificateData;
     if (signatureAlgorithm === 'ecdsa') {
         const { x, y } = publicKeyDetails as PublicKeyDetailsECDSA;
-        const normalizedX = x.length % 2 === 0 ? x : '0' + x;
-        const normalizedY = y.length % 2 === 0 ? y : '0' + y;
-        const fullPubKey = normalizedX + normalizedY;
+        const fullPubKey = x + y;
         const pubKeyBytes = Buffer.from(fullPubKey, 'hex')
-
         return findStartIndexEC(pubKeyBytes.toString('hex'), rawCert);
     } else {
         // Splits to 525 words of 8 bits each

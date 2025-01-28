@@ -26,12 +26,16 @@ export function parseCertificateSimple(pem: string): CertificateData {
     signatureAlgorithm: '',
     hashAlgorithm: '',
     publicKeyDetails: undefined,
+    tbsBytes: undefined,
+    tbsBytesLength: '',
     rawPem: '',
     rawTxt: '',
     publicKeyAlgoOID: '',
   };
   try {
     const cert = getCertificateFromPem(pem);
+    certificateData.tbsBytes = getTBSBytesForge(cert);
+    certificateData.tbsBytesLength = certificateData.tbsBytes.length.toString();
 
     const publicKeyAlgoOID = cert.subjectPublicKeyInfo.algorithm.algorithmId;
     const publicKeyAlgoFN = getFriendlyName(publicKeyAlgoOID);
@@ -224,8 +228,11 @@ export function getParamsECDSA(cert: Certificate): PublicKeyDetailsECDSA {
       const elliptic = initElliptic();
       const ec = new elliptic.ec(getCurveForElliptic(curveName));
       const key = ec.keyFromPublic(publicKeyBuffer);
-      x = key.getPublic().getX().toString('hex');
-      y = key.getPublic().getY().toString('hex');
+      const x_point = key.getPublic().getX().toString('hex');
+      const y_point = key.getPublic().getY().toString('hex');
+
+      x = x_point.length % 2 === 0 ? x_point : '0' + x_point;
+      y = y_point.length % 2 === 0 ? y_point : '0' + y_point;
     }
     return { curve: curveName, params: curveParams, bits: bits, x: x, y: y };
   } catch (error) {
@@ -339,6 +346,11 @@ export function getCertificateFromPem(pemContent: string): Certificate {
 
 export function getTBSBytes(pemContent: string): Uint8Array {
   const certificate = getCertificateFromPem(pemContent);
+  return Uint8Array.from(
+    certificate.tbsView.map((byte) => parseInt(byte.toString(16), 16))
+  );
+}
+export function getTBSBytesForge(certificate: Certificate): Uint8Array {
   return Uint8Array.from(
     certificate.tbsView.map((byte) => parseInt(byte.toString(16), 16))
   );
