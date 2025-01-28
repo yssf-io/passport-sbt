@@ -134,6 +134,10 @@ export function pad(hashFunction: (typeof hashAlgos)[number]) {
         : sha384_512Pad;
 }
 
+export function padWithZeroes(bytes: number[], length: number) {
+    return bytes.concat(new Array(length - bytes.length).fill(0));
+}
+
 function validatePassportMetadata(passportData: PassportData): void {
     if (!passportData.parsed) {
         throw new Error('Passport data is not parsed');

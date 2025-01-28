@@ -1,5 +1,3 @@
-import { SignatureAlgorithm } from '../utils/types';
-
 export const RELAYER_URL = 'https://0pw5u65m3a.execute-api.eu-north-1.amazonaws.com/api-stage/mint';
 //export const COMMITMENT_TREE_TRACKER_URL = "https://app.proofofpassport.com/apiv2/download-merkle-tree"
 export const COMMITMENT_TREE_TRACKER_URL =
@@ -133,7 +131,8 @@ export const n_csca = 120;
 export const k_csca = 35;
 export const n_dsc_ecdsa = 64;
 export const k_dsc_ecdsa = 4;
-export const max_cert_bytes = 1664;
+export const max_dsc_bytes = 1664;
+export const max_csca_bytes = 1664; // TODO: change this value
 export const countryCodes = {
   AFG: 'Afghanistan',
   ALA: 'Aland Islands',

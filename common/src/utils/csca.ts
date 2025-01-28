@@ -151,7 +151,7 @@ export function findOIDPosition(
 export function generateCircuitInputsDSC(
   dscSecret: string,
   dscCertificate: any,
-  max_cert_bytes: number,
+  max_dsc_bytes: number,
   devMode: boolean = false
 ) {
   const dscCert = getCertificateFromPem(dscCertificate);
@@ -174,8 +174,8 @@ export function generateCircuitInputsDSC(
   let dsc_messagePaddedLen;
   [dsc_message_padded, dsc_messagePaddedLen] =
     hashAlgorithm == 'sha384' || hashAlgorithm == 'sha512'
-      ? sha384_512Pad(dscTbsCertUint8Array, max_cert_bytes)
-      : shaPad(dscTbsCertUint8Array, max_cert_bytes);
+      ? sha384_512Pad(dscTbsCertUint8Array, max_dsc_bytes)
+      : shaPad(dscTbsCertUint8Array, max_dsc_bytes);
 
   // const { n, k } = getNAndK(`${signatureAlgorithm}_${hashAlgorithm}_${exponent}_${bits}` as SignatureAlgorithm);
   //dsc key is padded to 525 bytes

@@ -2,6 +2,6 @@ pragma circom 2.1.9;
 
 include "../dsc.circom";
 
-component main { public [  merkle_root] } = DSC(9, 64, 6, 1664, 12);
+component main { public [  merkle_root] } = DSC(9, 64, 6);
 
 

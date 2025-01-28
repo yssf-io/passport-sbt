@@ -1,17 +1,16 @@
-import { SignatureAlgorithmIndex } from '../constants/constants';
+import { max_dsc_bytes, max_csca_bytes, SignatureAlgorithmIndex } from '../constants/constants';
 import { LeanIMT } from '@openpassport/zk-kit-lean-imt';
 import { poseidon2 } from 'poseidon-lite';
-import { parseCertificateSimple } from './certificate_parsing/parseCertificateSimple';
+import { getTBSBytes, parseCertificateSimple } from './certificate_parsing/parseCertificateSimple';
 import {
   PublicKeyDetailsECDSA,
   PublicKeyDetailsRSA,
 } from './certificate_parsing/dataStructure';
 import { SignatureAlgorithm } from './types';
-import { getNAndK } from './passports/passport';
+import { getNAndK, getNAndKCSCA, pad } from './passports/passport';
 import { splitToWords } from './bytes';
 import { hexToDecimal } from './bytes';
-import { customHasher } from './hash';
-
+import { customHasher, packBytesAndPoseidon } from './hash';
 
 export function getLeaf(dsc: string): string {
   const { signatureAlgorithm, publicKeyDetails, hashAlgorithm } = parseCertificateSimple(dsc);
@@ -46,7 +45,17 @@ export function getLeaf(dsc: string): string {
     return customHasher([sigAlgIndex, ...pubkeyChunked]);
   }
 }
+
 export function getLeafCSCA(dsc: string): string {
+  // Convert PEM certificate string to bytes array
+  // const tbsBytes = getTBSBytes(cscaPem);
+  // const [raw_csca_padded, raw_csca_actual_length] = pad("sha256")( // TODO: fix this
+  //   tbsBytes,
+  //   max_csca_bytes
+  // );
+  // // Pack bytes and hash with poseidon
+  // return packBytesAndPoseidon(Array.from(raw_csca_padded).map(x => Number(x)));
+
   const parsedCertificate = parseCertificateSimple(dsc);
 
   const { signatureAlgorithm, hashAlgorithm } = parsedCertificate;

@@ -16,7 +16,6 @@ export function getCircuitNameFromPassportData(passportData: PassportData, circu
 }
 
 function getDSCircuitNameFromPassportData(passportData: PassportData) {
-
   const passportMetadata = parsePassportData(passportData);
   const signatureAlgorithm = passportMetadata.cscaSignatureAlgorithm;
   const hashFunction = passportMetadata.cscaHashFunction;

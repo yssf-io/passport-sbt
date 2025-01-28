@@ -8,7 +8,7 @@ import { groth16 } from 'snarkjs'
 import { expect } from "chai";
 import path from 'path';
 
-const max_cert_bytes = 1664;
+const max_dsc_bytes = 1664;
 
 const vkey_sha256_rsa = JSON.parse(fs.readFileSync(path.join(__dirname, '../src/vkey/dsc_rsa_65537_sha256_4096_vkey.json'), 'utf8'));
 const vkey_sha256_rsapss = JSON.parse(fs.readFileSync(path.join(__dirname, '../src/vkey/dsc_rsapss_65537_sha256_4096_vkey.json'), 'utf8'));
@@ -22,7 +22,7 @@ describe('MODAL PROVER', function () {
             const inputs = generateCircuitInputsDSC(
                 BigInt(0).toString(),
                 mock_dsc_sha256_rsapss_4096,
-                max_cert_bytes,
+                max_dsc_bytes,
                 true
             );
             console.log('\x1b[34msending request to modal server\x1b[0m');
@@ -43,7 +43,7 @@ describe('MODAL PROVER', function () {
             const inputs = generateCircuitInputsDSC(
                 BigInt(0).toString(),
                 mock_dsc_sha256_rsa_4096,
-                max_cert_bytes,
+                max_dsc_bytes,
                 true
             );
             //console.log(JSON.stringify(inputs));
@@ -66,7 +66,7 @@ describe('MODAL PROVER', function () {
             const inputs = generateCircuitInputsDSC(
                 BigInt(0).toString(),
                 mock_dsc_sha1_rsa_4096,
-                max_cert_bytes,
+                max_dsc_bytes,
                 true
             );
 
