@@ -81,6 +81,7 @@ import StartScreen from './StartScreen';
 import UserInfo from './UserInfo';
 import ValidProofScreen from './ValidProofScreen';
 import WrongProofScreen from './WrongProofScreen';
+import UpdateScreen from './UpdateScreen';
 
 // import components
 import CustomButton from '../components/CustomButton';
@@ -303,7 +304,8 @@ const MainScreen: React.FC = () => {
               opacity={
                 selectedTab !== 'start' &&
                 selectedTab !== 'app' &&
-                selectedTab !== 'splash'
+                selectedTab !== 'splash' &&
+                selectedTab !== 'update'
                   ? 1
                   : 0
               }
@@ -1085,6 +1087,9 @@ const MainScreen: React.FC = () => {
         >
           <Tabs.Content value="splash" f={1}>
             <SplashScreen />
+          </Tabs.Content>
+          <Tabs.Content value="update" f={1}>
+            <UpdateScreen />
           </Tabs.Content>
           <Tabs.Content value="start" f={1}>
             <StartScreen />
