@@ -78,14 +78,29 @@ build_circuit() {
     yarn snarkjs zkey export solidityverifier \
         ${OUTPUT_DIR}/${CIRCUIT_NAME}/${CIRCUIT_NAME}_final.zkey \
         ${OUTPUT_DIR}/${CIRCUIT_NAME}/Verifier_${CIRCUIT_NAME}.sol
-    
-    # linux
-    sed -i "s/Groth16Verifier/Verifier_${CIRCUIT_NAME}/g" \
-        ${OUTPUT_DIR}/${CIRCUIT_NAME}/Verifier_${CIRCUIT_NAME}.sol
 
-    # mac OS
-    # sed -i '' "s/Groth16Verifier/Verifier_${CIRCUIT_NAME}/g" \
-    #     ${OUTPUT_DIR}/${CIRCUIT_NAME}/Verifier_${CIRCUIT_NAME}.sol
+    OS=""
+
+    case "$(uname)" in
+    'Darwin')
+        OS='Mac'
+        ;;
+    'Linux')
+        OS='Linux'
+        ;;
+    *)
+        echo "Unsupported platform: $(uname -a)"
+        exit 1
+        ;;
+    esac
+
+    if [ "$OS" = 'Mac' ]; then
+        sed -i '' "s/Groth16Verifier/Verifier_${CIRCUIT_NAME}/g" \
+            ${OUTPUT_DIR}/${CIRCUIT_NAME}/Verifier_${CIRCUIT_NAME}.sol
+    elif [ "$OS" = 'Linux' ]; then
+        sed -i "s/Groth16Verifier/Verifier_${CIRCUIT_NAME}/g" \
+            ${OUTPUT_DIR}/${CIRCUIT_NAME}/Verifier_${CIRCUIT_NAME}.sol
+    fi
 
     # Copy verifier to contracts directory
     mkdir -p ../contracts/contracts/verifiers/local/${CIRCUIT_TYPE}/

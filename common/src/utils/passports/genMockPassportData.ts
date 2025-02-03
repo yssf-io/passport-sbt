@@ -7,11 +7,13 @@ import * as mockCertificates from '../../constants/mockCertificates';
 import { countryCodes } from '../../constants/constants';
 import { parseCertificateSimple } from '../certificate_parsing/parseCertificateSimple';
 import { SignatureAlgorithm } from '../types';
-import { PublicKeyDetailsECDSA, PublicKeyDetailsRSAPSS } from '../certificate_parsing/dataStructure';
+import {
+  PublicKeyDetailsECDSA,
+  PublicKeyDetailsRSAPSS,
+} from '../certificate_parsing/dataStructure';
 import { getCurveForElliptic } from '../certificate_parsing/curves';
 import { formatAndConcatenateDataHashes, formatMrz } from './format';
 import { generateSignedAttr } from './format';
-import { mock_dsc_sha256_rsa_3_2048 } from '../../constants/mockCertificates';
 
 function generateRandomBytes(length: number): number[] {
   // Generate numbers between -128 and 127 to match the existing signed byte format
@@ -27,9 +29,11 @@ function generateDataGroupHashes(mrzHash: number[], hashLen: number): [number, n
     [4, generateRandomBytes(hashLen)],
     [5, generateRandomBytes(hashLen)],
     [7, generateRandomBytes(hashLen)],
+    [8, generateRandomBytes(hashLen)],
     [11, generateRandomBytes(hashLen)],
     [12, generateRandomBytes(hashLen)],
     [14, generateRandomBytes(hashLen)],
+    [15, generateRandomBytes(hashLen)],
   ];
 
   return dataGroups;
@@ -125,6 +129,14 @@ export function genMockPassportData(
       privateKeyPem = mockCertificates.mock_dsc_sha1_ecdsa_secp256r1_key;
       dsc = mockCertificates.mock_dsc_sha1_ecdsa_secp256r1;
       break;
+    case 'ecdsa_sha256_secp521r1_521':
+      privateKeyPem = mockCertificates.mock_dsc_sha256_ecdsa_secp521r1_key;
+      dsc = mockCertificates.mock_dsc_sha256_ecdsa_secp521r1;
+      break;
+    case 'ecdsa_sha512_secp521r1_521':
+      privateKeyPem = mockCertificates.mock_dsc_sha512_ecdsa_secp521r1_key;
+      dsc = mockCertificates.mock_dsc_sha512_ecdsa_secp521r1;
+      break;
     case 'ecdsa_sha384_secp384r1_384':
       privateKeyPem = mockCertificates.mock_dsc_sha384_ecdsa_secp384r1_key;
       dsc = mockCertificates.mock_dsc_sha384_ecdsa_secp384r1;
@@ -132,6 +144,10 @@ export function genMockPassportData(
     case 'ecdsa_sha256_secp384r1_384':
       privateKeyPem = mockCertificates.mock_dsc_sha256_ecdsa_secp384r1_key;
       dsc = mockCertificates.mock_dsc_sha256_ecdsa_secp384r1;
+      break;
+    case 'ecdsa_sha1_brainpoolP256r1_256':
+      privateKeyPem = mockCertificates.mock_dsc_sha1_ecdsa_brainpoolP256r1_key;
+      dsc = mockCertificates.mock_dsc_sha1_ecdsa_brainpoolP256r1;
       break;
     case 'ecdsa_sha256_brainpoolP256r1_256':
       privateKeyPem = mockCertificates.mock_dsc_sha256_ecdsa_brainpoolP256r1_key;
@@ -161,6 +177,10 @@ export function genMockPassportData(
       privateKeyPem = mockCertificates.mock_dsc_sha256_rsapss_32_65537_2048_key;
       dsc = mockCertificates.mock_dsc_sha256_rsapss_32_65537_2048;
       break;
+    case 'ecdsa_sha256_brainpoolP384r1_384':
+      privateKeyPem = mockCertificates.mock_dsc_sha256_ecdsa_brainpoolP384r1_key;
+      dsc = mockCertificates.mock_dsc_sha256_ecdsa_brainpoolP384r1;
+      break;
     case 'ecdsa_sha384_brainpoolP384r1_384':
       privateKeyPem = mockCertificates.mock_dsc_sha384_ecdsa_brainpoolP384r1_key;
       dsc = mockCertificates.mock_dsc_sha384_ecdsa_brainpoolP384r1;
@@ -180,6 +200,10 @@ export function genMockPassportData(
     case 'ecdsa_sha256_brainpoolP224r1_224':
       privateKeyPem = mockCertificates.mock_dsc_sha256_ecdsa_brainpoolP224r1_key;
       dsc = mockCertificates.mock_dsc_sha256_ecdsa_brainpoolP224r1;
+      break;
+    case 'ecdsa_sha384_brainpoolP512r1_512':
+      privateKeyPem = mockCertificates.mock_dsc_sha384_ecdsa_brainpoolP512r1_key;
+      dsc = mockCertificates.mock_dsc_sha384_ecdsa_brainpoolP512r1;
       break;
     case 'ecdsa_sha512_brainpoolP512r1_512':
       privateKeyPem = mockCertificates.mock_dsc_sha512_ecdsa_brainpoolP512r1_key;
@@ -205,6 +229,22 @@ export function genMockPassportData(
       privateKeyPem = mockCertificates.mock_dsc_sha384_rsa_65537_4096_key;
       dsc = mockCertificates.mock_dsc_sha384_rsa_65537_4096;
       break;
+    case 'rsapss_sha512_65537_4096':
+      privateKeyPem = mockCertificates.mock_dsc_sha512_rsapss_64_65537_4096_key;
+      dsc = mockCertificates.mock_dsc_sha512_rsapss_64_65537_4096;
+      break;
+    case 'rsapss_sha512_65537_2048':
+      privateKeyPem = mockCertificates.mock_dsc_sha512_rsapss_64_65537_2048_key;
+      dsc = mockCertificates.mock_dsc_sha512_rsapss_64_65537_2048;
+      break;
+    case 'ecdsa_sha512_secp521r1_521':
+      privateKeyPem = mockCertificates.mock_dsc_sha512_ecdsa_secp521r1_key;
+      dsc = mockCertificates.mock_dsc_sha512_ecdsa_secp521r1;
+      break;
+    case 'ecdsa_sha224_secp224r1_224':
+      privateKeyPem = mockCertificates.mock_dsc_sha224_ecdsa_secp224r1_key;
+      dsc = mockCertificates.mock_dsc_sha224_ecdsa_secp224r1;
+      break;
   }
 
   // Generate MRZ hash first
@@ -214,7 +254,6 @@ export function genMockPassportData(
   const dataGroupHashes = generateDataGroupHashes(mrzHash as number[], getHashLen(dgHashAlgo));
 
   const eContent = formatAndConcatenateDataHashes(dataGroupHashes, 63);
-
   const signedAttr = generateSignedAttr(hash(eContentHashAlgo, eContent) as number[]);
   const hashAlgo = signatureType.split('_')[1];
   const signature = sign(privateKeyPem, dsc, hashAlgo, signedAttr);
@@ -243,11 +282,11 @@ function sign(
 
   if (signatureAlgorithm === 'rsapss') {
     const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
-    const md = forge.md.sha256.create();
+    const md = forge.md[hashAlgorithm].create();
     md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
     const pss = forge.pss.create({
-      md: forge.md.sha256.create(),
-      mgf: forge.mgf.mgf1.create(forge.md.sha256.create()),
+      md: forge.md[hashAlgorithm].create(),
+      mgf: forge.mgf.mgf1.create(forge.md[hashAlgorithm].create()),
       saltLength: parseInt((publicKeyDetails as PublicKeyDetailsRSAPSS).saltLength),
     });
     const signatureBytes = privateKey.sign(md, pss);

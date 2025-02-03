@@ -1,15 +1,12 @@
 import * as forge from 'node-forge';
 import * as fs from 'fs';
-import { CSCA_TREE_DEPTH, MODAL_SERVER_ADDRESS } from '../constants/constants';
-import { poseidon2 } from 'poseidon-lite';
-import { IMT } from '@openpassport/zk-kit-imt';
-import serialized_csca_tree from '../../pubkeys/serialized_csca_tree.json';
+import { MODAL_SERVER_ADDRESS } from '../constants/constants';
 import axios from 'axios';
 import { SKI_PEM, SKI_PEM_DEV } from '../constants/skiPem';
 import { splitToWords } from './bytes';
 import path from 'path';
 
-export function findStartIndexEC(modulus: string, messagePadded: Uint8Array): number {
+export function findStartIndexEC(modulus: string, messagePadded: Uint8Array): [number, number] {
   const modulusNumArray = [];
   for (let i = 0; i < modulus.length; i += 2) {
     modulusNumArray.push(parseInt(modulus.slice(i, i + 2), 16));
@@ -37,10 +34,11 @@ export function findStartIndexEC(modulus: string, messagePadded: Uint8Array): nu
   if (startIndex === -1) {
     throw new Error('DSC Pubkey not found in CSCA certificate');
   }
-  return startIndex;
+  return [startIndex, modulusNumArray.length];
 }
 
-export function findStartIndex(modulus: string, messagePadded: Uint8Array): number {
+// @returns [startIndex, length] where startIndex is the index of the first byte of the modulus in the message and length is the length of the modulus in bytes
+export function findStartIndex(modulus: string, messagePadded: Uint8Array): [number, number] {
   const modulusNumArray = [];
   for (let i = 0; i < modulus.length; i += 2) {
     const hexPair = modulus.slice(i, i + 2);
@@ -64,7 +62,7 @@ export function findStartIndex(modulus: string, messagePadded: Uint8Array): numb
       }
     }
     if (matched) {
-      return i;
+      return [i, modulusNumArray.length];
     }
   }
 
@@ -139,6 +137,8 @@ export function findOIDPosition(
   throw new Error('OID not found in message');
 }
 
+
+
 export function getCSCAFromSKI(ski: string, devMode: boolean): string {
   const normalizedSki = ski.replace(/\s+/g, '').toLowerCase();
 
@@ -161,31 +161,6 @@ export function getCSCAFromSKI(ski: string, devMode: boolean): string {
   return cscaPem;
 }
 
-export function derToBytes(derValue: string) {
-  const bytes = [];
-  for (let i = 0; i < derValue.length; i++) {
-    bytes.push(derValue.charCodeAt(i));
-  }
-  return bytes;
-}
-
-export function getCSCAModulusMerkleTree() {
-  const tree = new IMT(poseidon2, CSCA_TREE_DEPTH, 0, 2);
-  tree.setNodes(serialized_csca_tree);
-  return tree;
-}
-
-export function getCSCAModulusProof(leaf) {
-  console.log('leaf', leaf);
-  let tree = new IMT(poseidon2, CSCA_TREE_DEPTH, 0, 2);
-  tree.setNodes(serialized_csca_tree);
-  const index = tree.indexOf(leaf);
-  if (index === -1) {
-    throw new Error('Your public key was not found in the registry');
-  }
-  const proof = tree.createProof(index);
-  return [tree.root, proof];
-}
 
 export function getTBSHash(
   cert: forge.pki.Certificate,
@@ -201,7 +176,7 @@ export function getTBSHash(
   const tbsCertificateHashString = tbsCertificateHash.data;
   const tbsCertificateHashHex = Buffer.from(tbsCertificateHashString, 'binary').toString('hex');
   const tbsCertificateHashBigint = BigInt(`0x${tbsCertificateHashHex}`);
-  console.log('tbsCertificateHashBigint', tbsCertificateHashBigint);
+  // console.log('tbsCertificateHashBigint', tbsCertificateHashBigint);
   return splitToWords(tbsCertificateHashBigint, n, k);
 }
 

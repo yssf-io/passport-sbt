@@ -32,7 +32,7 @@ run the following command to extract the masterlist from the ICAO website as a f
 | `all` | extract both
 
 ```bash
-yarn masterlist-extract $arg
+yarn extract-masterlist $arg
 ```
 
 ## Prisma

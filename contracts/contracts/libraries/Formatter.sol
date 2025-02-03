@@ -1,12 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+/**
+ * @title Formatter Library
+ * @notice A library providing utility functions to format names, dates, and encode data.
+ */
 library Formatter {
     error InvalidDateLength();
     error InvalidAsciiCode();
 
-    uint256 constant MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH = 20;
+    uint256 constant MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH = 10;
 
+    /**
+     * @notice Formats a full name string into first name(s) and last name.
+     * @dev The input is expected to contain a last name, followed by a "<<" separator and then first name(s).
+     *      The returned array contains the first names at index 0 and the last name at index 1.
+     * @param input The input string structured as "lastName<<firstName(s)".
+     * @return names An array of two strings: [firstName(s), lastName].
+     */
     function formatName(
         string memory input
     ) internal pure returns (string[] memory) {
@@ -22,10 +33,10 @@ library Formatter {
             i++;
         }
 
-        // Skip the separator "<<"
+        // Skip the separator "<<".
         i += 2;
 
-        // Extract first names
+        // Extract first names.
         while (i < inputBytes.length) {
             if (inputBytes[i] == "<") {
                 if (i + 1 < inputBytes.length && inputBytes[i + 1] == "<") {
@@ -46,10 +57,17 @@ library Formatter {
         return names;
     }
 
+    /**
+     * @notice Formats a compact date string into a human-readable date.
+     * @dev Expects the input date string to have exactly 6 characters in YYMMDD format.
+     *      Returns the date in "DD-MM-YY" format.
+     * @param date A string representing the date in YYMMDD format.
+     * @return A formatted date string in the format "DD-MM-YY".
+     */
     function formatDate(
         string memory date
     ) internal pure returns (string memory) {
-        // Ensure the date string is the correct length
+        // Ensure the date string is the correct length.
         if (bytes(date).length != 6) {
             revert InvalidDateLength();
         }
@@ -61,6 +79,13 @@ library Formatter {
         return string(abi.encodePacked(day, "-", month, "-", year));
     }
 
+    /**
+     * @notice Converts an ASCII numeral code to its corresponding unsigned integer.
+     * @dev The input must represent an ASCII code for digits (0-9), i.e. between 48 and 57.
+     *      Reverts with InvalidAsciiCode if the input is out of range.
+     * @param numAscii The ASCII code of a digit character.
+     * @return The numeric value (0-9) corresponding to the ASCII code.
+     */
     function numAsciiToUint(uint256 numAscii) internal pure returns (uint256) {
         if (numAscii < 48 || numAscii > 57) {
             revert InvalidAsciiCode();
@@ -68,11 +93,17 @@ library Formatter {
         return (numAscii - 48);
     }
 
+    /**
+     * @notice Converts an array of three field elements into a bytes representation.
+     * @dev Each element is converted into a specific number of bytes: 31, 31, and 29 respectively.
+     * @param publicSignals An array of three unsigned integers representing field elements.
+     * @return bytesArray A bytes array of total length 91 that encodes the three field elements.
+     */
     function fieldElementsToBytes(
         uint256[3] memory publicSignals
     ) internal pure returns (bytes memory) {
-        uint8[3] memory bytesCount = [31, 31, 28];
-        bytes memory bytesArray = new bytes(90);
+        uint8[3] memory bytesCount = [31, 31, 29];
+        bytes memory bytesArray = new bytes(91);
 
         uint256 index = 0;
         for (uint256 i = 0; i < 3; i++) {
@@ -85,50 +116,42 @@ library Formatter {
         return bytesArray;
     }
 
+    /**
+     * @notice Extracts forbidden country codes from a packed uint256.
+     * @dev Each forbidden country is represented by 3 bytes in the packed data.
+     *      The function extracts up to MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH forbidden countries.
+     * @param publicSignal A packed uint256 containing encoded forbidden country data.
+     * @return forbiddenCountries An array of strings representing the forbidden country codes.
+     */
     function extractForbiddenCountriesFromPacked(
-        uint256[2] memory publicSignals
+        uint256 publicSignal
     )
         internal
         pure
         returns (
-            bytes3[MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH]
-                memory forbiddenCountries
+            string[MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH] memory forbiddenCountries
         )
     {
         for (uint256 j = 0; j < MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH; j++) {
             uint256 byteIndex = j * 3;
 
-            if (byteIndex + 2 < 32) {
-                uint256 shift = byteIndex * 8;
-                uint256 mask = 0xFFFFFF;
-                uint256 packedData = (publicSignals[0] >> shift) & mask;
-                forbiddenCountries[j] = bytes3(uint24(packedData));
-            } else if (byteIndex < 32) {
-                uint256 bytesFrom0 = 32 - byteIndex;
-                uint256 bytesTo1 = 3 - bytesFrom0;
-
-                uint256 shift0 = byteIndex * 8;
-                uint256 mask0 = (1 << (bytesFrom0 * 8)) - 1;
-                uint256 part0 = (publicSignals[0] >> shift0) & mask0;
-
-                uint256 shift1 = 0;
-                uint256 mask1 = (1 << (bytesTo1 * 8)) - 1;
-                uint256 part1 = (publicSignals[1] >> shift1) & mask1;
-
-                uint256 combined = (part1 << (bytesFrom0 * 8)) | part0;
-                forbiddenCountries[j] = bytes3(uint24(combined));
-            } else {
-                uint256 byteIndexIn1 = byteIndex - 32;
-                uint256 shift = byteIndexIn1 * 8;
-                uint256 mask = 0xFFFFFF;
-                uint256 packedData = (publicSignals[1] >> shift) & mask;
-                forbiddenCountries[j] = bytes3(uint24(packedData));
-            }
+            uint256 shift = byteIndex * 8;
+            uint256 mask = 0xFFFFFF;
+            uint256 packedData = (publicSignal >> shift) & mask;
+            forbiddenCountries[j] = string(abi.encodePacked(uint24(packedData)));
         }
 
         return forbiddenCountries;
     }
 
+    /**
+     * @notice Converts an array of 6 numerical values representing a date into a Unix timestamp.
+     * @dev Each element in the dateNum array is taken modulo 10, converted to its ASCII digit, 
+     *      and concatenated to form a date string in YYMMDD format. This string is then converted 
+     *      into a Unix timestamp using dateToUnixTimestamp.
+     * @param dateNum An array of 6 unsigned integers representing a date in YYMMDD format.
+     * @return timestamp The Unix timestamp corresponding to the provided date.
+     */
     function proofDateToUnixTimestamp(
         uint256[6] memory dateNum
     ) internal pure returns (uint256) {
@@ -142,6 +165,14 @@ library Formatter {
         return currentTimestamp;
     }
 
+    /**
+     * @notice Converts a date string in YYMMDD format into a Unix timestamp.
+     * @dev Parses the date string by extracting year, month, and day components using substring,
+     *      converts each component to an integer, and then computes the timestamp via toTimestamp.
+     *      Reverts if the input string is not exactly 6 characters long.
+     * @param date A 6-character string representing the date in YYMMDD format.
+     * @return timestamp The Unix timestamp corresponding to the input date.
+     */
     function dateToUnixTimestamp(
         string memory date
     ) internal pure returns (uint256) {
@@ -156,6 +187,14 @@ library Formatter {
         return toTimestamp(year, month, day);
     }
 
+    /**
+     * @notice Extracts a substring from a given string.
+     * @dev Returns the substring from startIndex (inclusive) to endIndex (exclusive).
+     * @param str The input string.
+     * @param startIndex The starting index of the substring (inclusive).
+     * @param endIndex The ending index of the substring (exclusive).
+     * @return The resulting substring.
+     */
     function substring(
         string memory str,
         uint startIndex,
@@ -171,7 +210,12 @@ library Formatter {
         return string(result);
     }
 
-    // Helper function to convert a string to an integer
+    /**
+     * @notice Parses a numeric string and returns its unsigned integer representation.
+     * @dev Assumes the input string contains only numeric characters.
+     * @param value The string representing a number.
+     * @return result The parsed unsigned integer.
+     */
     function parseDatePart(string memory value) internal pure returns (uint) {
         bytes memory tempEmptyStringTest = bytes(value);
         if (tempEmptyStringTest.length == 0) {
@@ -187,7 +231,15 @@ library Formatter {
         return result;
     }
 
-    // Convert date to Unix timestamp
+    /**
+     * @notice Converts a specific date into a Unix timestamp.
+     * @dev Calculates the timestamp by summing the number of days for years, months, and days since January 1, 1970.
+     *      Takes leap years into account during the calculation.
+     * @param year The full year (e.g., 2023).
+     * @param month The month (1-12).
+     * @param day The day of the month.
+     * @return timestamp The Unix timestamp corresponding to the given date.
+     */
     function toTimestamp(
         uint256 year,
         uint256 month,
@@ -195,7 +247,7 @@ library Formatter {
     ) internal pure returns (uint timestamp) {
         uint16 i;
 
-        // Year
+        // Year.
         for (i = 1970; i < year; i++) {
             if (isLeapYear(i)) {
                 timestamp += 366 days;
@@ -204,7 +256,7 @@ library Formatter {
             }
         }
 
-        // Month
+        // Month.
         uint8[12] memory monthDayCounts;
         monthDayCounts[0] = 31;
         if (isLeapYear(year)) {
@@ -227,13 +279,17 @@ library Formatter {
             timestamp += monthDayCounts[i - 1] * 1 days;
         }
 
-        // Day
+        // Day.
         timestamp += (day - 1) * 1 days;
 
         return timestamp;
     }
 
-    // Check if year is a leap year
+    /**
+     * @notice Checks whether a given year is a leap year.
+     * @param year The year to check.
+     * @return True if the year is a leap year, otherwise false.
+     */
     function isLeapYear(uint256 year) internal pure returns (bool) {
         if (year % 4 != 0) {
             return false;
@@ -246,15 +302,4 @@ library Formatter {
         }
     }
 
-    function formatAge(
-        string memory age
-    ) internal pure returns (string memory) {
-        // if it's an empty two bytes string, just show N/A
-        return
-            bytes(age).length == 2 &&
-                bytes(age)[0] == 0x00 &&
-                bytes(age)[1] == 0x00
-                ? "N/A"
-                : age;
-    }
 }

@@ -5,7 +5,7 @@ import { Progress, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import {
   DEVELOPMENT_MODE,
-  max_cert_bytes,
+  max_dsc_bytes,
 } from '../../../common/src/constants/constants';
 import {
   DisclosureOptions,
@@ -193,7 +193,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
           const cscaInputs = generateCircuitInputsDSC(
             dscSecret as string,
             passportData.dsc,
-            max_cert_bytes,
+            max_dsc_bytes,
             selectedApp.devMode,
           );
           [dscProof, proof] = await Promise.all([

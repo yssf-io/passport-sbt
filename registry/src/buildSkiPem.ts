@@ -3,6 +3,7 @@ import path from 'path';
 import { parseCertificateSimple } from '../../common/src/utils/certificate_parsing/parseCertificateSimple';
 import { parseCertificate } from '../../common/src/utils/certificate_parsing/parseCertificate';
 import { CertificateData } from '../../common/src/utils/certificate_parsing/dataStructure';
+import { DEVELOPMENT_MODE } from '../../common/src/constants/constants';
 
 const pemDirectory = path.join(__dirname, '..', 'outputs', 'csca', 'pem_masterlist');
 const ski_pem_path = path.join(__dirname, '..', 'outputs', 'ski_pem.json');
@@ -46,9 +47,8 @@ async function main() {
 
     const devCertificates = await getAllDevPem();
     const prodCertificates = fs.readdirSync(pemDirectory);
-    const skipProd = false;
 
-    if (!skipProd) {
+    if (!DEVELOPMENT_MODE) {
         for (const prodCertificate of prodCertificates) {
             const pemContent = cleanCertificate(fs.readFileSync(path.join(pemDirectory, prodCertificate), 'utf8'));
             //log filename

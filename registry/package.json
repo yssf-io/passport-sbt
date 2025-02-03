@@ -30,7 +30,9 @@
     "db-clear": "ts-node src/deleteDb.ts",
     "extract-masterlist": "ts-node src/extractMasterList.ts",
     "parse-data": "ts-node src/parseData.ts",
-    "mapJson": "ts-node src/buildMapJson.ts"
+    "mapJson": "ts-node src/buildMapJson.ts",
+    "dsc-tree": "ts-node src/dsc/build_dsc_merkle_tree.ts",
+    "csca-tree": "ts-node src/csca/build_csca_merkle_tree.ts"
   },
   "license": "MIT"
 }

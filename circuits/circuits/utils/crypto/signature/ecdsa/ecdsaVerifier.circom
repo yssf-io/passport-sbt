@@ -66,7 +66,7 @@ template EcdsaVerifier(signatureAlgorithm, n, k) {
 }
 
 function get_a(signatureAlgorithm) {
-    if (signatureAlgorithm == 7 || signatureAlgorithm == 8) { 
+    if (signatureAlgorithm == 7 || signatureAlgorithm == 8) {  //secp256r1
         return [ 
             18446744073709551612, 
             4294967295, 
@@ -74,7 +74,7 @@ function get_a(signatureAlgorithm) {
             18446744069414584321 
         ];
     }
-    if (signatureAlgorithm == 9 || signatureAlgorithm == 23) {
+    if (signatureAlgorithm == 9 || signatureAlgorithm == 23) { //secp384r1
         return [
             4294967292,
             18446744069414584320,
@@ -84,7 +84,7 @@ function get_a(signatureAlgorithm) {
             18446744073709551615
         ];
     }
-     if (signatureAlgorithm == 21 || signatureAlgorithm == 24 || signatureAlgorithm == 25 || signatureAlgorithm == 36) {
+     if (signatureAlgorithm == 21 || signatureAlgorithm == 24 || signatureAlgorithm == 25 || signatureAlgorithm == 36) { //brainpoolP256r1
         return [
             16810331318623712729,
             18122579188607900780,
@@ -92,7 +92,7 @@ function get_a(signatureAlgorithm) {
             9032542404991529047
         ];
      }
-    if (signatureAlgorithm == 22 || signatureAlgorithm == 26) { 
+    if (signatureAlgorithm == 22 || signatureAlgorithm == 26 || signatureAlgorithm == 37) { // brainpoolP384r1
         return [
             335737924824737830,
             9990533504564909291,
@@ -103,7 +103,7 @@ function get_a(signatureAlgorithm) {
         ];
     }
 
-    if (signatureAlgorithm == 27 || signatureAlgorithm == 28 || signatureAlgorithm == 30) { 
+    if (signatureAlgorithm == 27 || signatureAlgorithm == 28 || signatureAlgorithm == 30) { // brainpoolP224r1 
         return [
             3402800963,
             2953063001,
@@ -115,7 +115,7 @@ function get_a(signatureAlgorithm) {
         ];
     }
 
-    if (signatureAlgorithm == 29) { 
+    if (signatureAlgorithm == 29 || signatureAlgorithm == 38) { // brainpoolP512r1
         return  [
             16699818341992010954,
             9156125524185237433,
@@ -128,11 +128,24 @@ function get_a(signatureAlgorithm) {
         ];
     }
 
+    if (signatureAlgorithm == 41) { 
+        return [
+            73786976294838206460,
+            73786976294838206463,
+            73786976294838206463,
+            73786976294838206463,
+            73786976294838206463,
+            73786976294838206463,
+            73786976294838206463,
+            576460752303423487
+        ];
+    }
+
     return [0];
 }
 
 function get_b(signatureAlgorithm) { 
-    if (signatureAlgorithm == 7 || signatureAlgorithm == 8) { 
+    if (signatureAlgorithm == 7 || signatureAlgorithm == 8) { //secp256r1
         return [
             4309448131093880907,
             7285987128567378166,
@@ -150,7 +163,7 @@ function get_b(signatureAlgorithm) {
             12912154004749740004
         ];
     }
-     if (signatureAlgorithm == 21 || signatureAlgorithm == 24 || signatureAlgorithm == 25 || signatureAlgorithm == 36) {
+     if (signatureAlgorithm == 21 || signatureAlgorithm == 24 || signatureAlgorithm == 25 || signatureAlgorithm == 36) { //brainpoolP256r1
         return  [
             7767825457231955894,
             10773760575486288334,
@@ -158,7 +171,7 @@ function get_b(signatureAlgorithm) {
             2800214691157789508
         ];
      }
-    if (signatureAlgorithm == 22 || signatureAlgorithm == 26) { 
+    if (signatureAlgorithm == 22 || signatureAlgorithm == 26 || signatureAlgorithm == 37) { //brainpoolP384r1
         return [
             4230998357940653073,
             8985869839777909140,
@@ -169,7 +182,7 @@ function get_b(signatureAlgorithm) {
         ];
     }
 
-    if (signatureAlgorithm == 27 || signatureAlgorithm == 28 || signatureAlgorithm == 30) { 
+    if (signatureAlgorithm == 27 || signatureAlgorithm == 28 || signatureAlgorithm == 30) { // brainpoolP224r1
         return  [
             946618379,
             1725674354,
@@ -181,7 +194,7 @@ function get_b(signatureAlgorithm) {
         ];
     }
 
-    if (signatureAlgorithm == 29) { 
+    if (signatureAlgorithm == 29 || signatureAlgorithm == 38) { // brainpoolP512r1
         return [
             2885045271355914019,
             10970857440773072349,
@@ -194,11 +207,24 @@ function get_b(signatureAlgorithm) {
         ];
     }
 
+    if (signatureAlgorithm == 41) { 
+        return [
+            35687965819361312512,
+            33244719099633405244,
+            68122903767798193136,
+            64948772962036742733,
+            36008729323586384137,
+            4298886627987975365,
+            30118149759215298644,
+            91854278977009778
+        ];
+    }
+
     return [0];
 }
 
 function get_p(signatureAlgorithm) { 
-    if (signatureAlgorithm == 7 || signatureAlgorithm == 8) { 
+    if (signatureAlgorithm == 7 || signatureAlgorithm == 8) { //secp256r1
         return [ 
             18446744073709551615, 
             4294967295, 
@@ -206,7 +232,7 @@ function get_p(signatureAlgorithm) {
             18446744069414584321 
         ];
     }
-    if (signatureAlgorithm == 9 || signatureAlgorithm == 23) {
+    if (signatureAlgorithm == 9 || signatureAlgorithm == 23) { //secp384r1
         return [
             4294967295,
             18446744069414584320,
@@ -216,7 +242,7 @@ function get_p(signatureAlgorithm) {
             18446744073709551615
         ];
     }
-     if (signatureAlgorithm == 21 || signatureAlgorithm == 24 || signatureAlgorithm == 25 || signatureAlgorithm == 36) {
+     if (signatureAlgorithm == 21 || signatureAlgorithm == 24 || signatureAlgorithm == 25 || signatureAlgorithm == 36) { //brainpoolP256r1
         return  [
             2311270323689771895,
             7943213001558335528,
@@ -224,7 +250,7 @@ function get_p(signatureAlgorithm) {
             12248480212390422972
         ];
      }
-    if (signatureAlgorithm == 22 || signatureAlgorithm == 26) { 
+    if (signatureAlgorithm == 22 || signatureAlgorithm == 26 || signatureAlgorithm == 37) { //brainpoolP384r1
         return [
             9747760000893709395,
             12453481191562877553,
@@ -235,7 +261,7 @@ function get_p(signatureAlgorithm) {
         ];
     }
 
-    if (signatureAlgorithm == 27 || signatureAlgorithm == 28 || signatureAlgorithm == 30) { 
+    if (signatureAlgorithm == 27 || signatureAlgorithm == 28 || signatureAlgorithm == 30) { //brainpoolP224r1
         return [
             2127085823,
             2547681781,
@@ -247,7 +273,7 @@ function get_p(signatureAlgorithm) {
         ];
     }
 
-    if (signatureAlgorithm == 29) { 
+    if (signatureAlgorithm == 29 || signatureAlgorithm == 38) { //brainpoolP512r1
         return [
             2930260431521597683,
             2918894611604883077,
@@ -257,6 +283,19 @@ function get_p(signatureAlgorithm) {
             14641358191536493070,
             4599554755319692295,
             12312170373589877899
+        ];
+    }
+
+    if (signatureAlgorithm == 41) { 
+        return [
+            73786976294838206463,
+            73786976294838206463,
+            73786976294838206463,
+            73786976294838206463,
+            73786976294838206463,
+            73786976294838206463,
+            73786976294838206463,
+            576460752303423487
         ];
     }
 

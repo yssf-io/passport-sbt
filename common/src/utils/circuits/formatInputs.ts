@@ -14,3 +14,13 @@ export function formatCountriesList(countries: string[]) {
     });
     return result;
 }
+
+export function reverseBytes(input: string): string {
+    const hex = input.slice(2);
+    
+    const bytes = hex.match(/.{2}/g) || [];
+    
+    const reversedBytes = bytes.reverse();
+    
+    return '0x' + reversedBytes.join('');
+}

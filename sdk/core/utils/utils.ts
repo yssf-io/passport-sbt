@@ -1,11 +1,11 @@
 // import { ethers } from 'ethers';
-import { getCurrentDateYYMMDD } from '../../../common/src/utils/utils';
+import { getCurrentDateYYMMDD } from '../../../common/src/utils/date';
 import {
   attributeToPosition,
   circuitNameFromMode,
   REGISTER_CONTRACT_ADDRESS,
 } from '../../../common/src/constants/constants';
-import { derToBytes } from '../../../common/src/utils/csca';
+import { derToBytes } from '../../../common/src/utils/bytes';
 import forge from 'node-forge';
 import { SKI_PEM, SKI_PEM_DEV } from './skiPem';
 import {

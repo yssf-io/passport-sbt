@@ -3,7 +3,7 @@ import * as path from 'path';
 
 export async function extractMasterlistDsc() {
   // Extract pem certificates from ldif file
-  const ldif_path = path.join(__dirname, '..', '..', 'inputs', 'icao_download_section', 'icaopkd-001-complete-007117.ldif');
+  const ldif_path = path.join(__dirname, '..', '..', 'inputs', 'icao_download_section', 'dsc.ldif');
   const pem_path = path.join(__dirname, '..', '..', 'outputs', 'dsc', 'pem_masterlist');
 
   const fileContent = fs.readFileSync(ldif_path, "utf-8");
@@ -30,3 +30,5 @@ export async function extractMasterlistDsc() {
 
   console.log(`Extracted ${certificates.length} certificates.`);
 }
+
+extractMasterlistDsc();

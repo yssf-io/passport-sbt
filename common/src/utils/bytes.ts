@@ -159,3 +159,10 @@ export function num2Bits(n: number, inValue: bigint): bigint[] {
     }
     return out;
 }
+export function derToBytes(derValue: string) {
+    const bytes = [];
+    for (let i = 0; i < derValue.length; i++) {
+        bytes.push(derValue.charCodeAt(i));
+    }
+    return bytes;
+}

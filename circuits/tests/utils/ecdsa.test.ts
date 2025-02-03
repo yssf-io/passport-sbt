@@ -49,6 +49,13 @@ const testSuite = [
     k: 6,
     reason: 'when hash bits are the same as curve bits',
   },
+  {
+    hash: 'sha512',
+    curve: 'p521',
+    n: 66,
+    k: 8,
+    reason: 'when hash bits are less than the curve bits',
+  },
 ];
 
 describe('ecdsa', () => {

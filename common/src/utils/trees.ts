@@ -2,6 +2,106 @@ import { poseidon9, poseidon3, poseidon2, poseidon6, poseidon13 } from 'poseidon
 import { ChildNodes, SMT } from '@openpassport/zk-kit-smt';
 import { stringToAsciiBigIntArray } from './circuits/uuid';
 import { LeanIMT } from '@openpassport/zk-kit-lean-imt';
+import {
+  CertificateData,
+} from './certificate_parsing/dataStructure';
+import { packBytesAndPoseidon } from './hash';
+import { DscCertificateMetaData, parseDscCertificateData } from './passports/passport_parsing/parseDscCertificateData';
+import { parseCertificateSimple } from './certificate_parsing/parseCertificateSimple';
+import { CSCA_TREE_DEPTH, DSC_TREE_DEPTH, max_csca_bytes } from '../constants/constants';
+import { max_dsc_bytes } from '../constants/constants';
+import serialized_csca_tree from '../../pubkeys/serialized_csca_tree.json';
+import serialized_dsc_tree from '../../pubkeys/serialized_dsc_tree.json';
+import { IMT } from '@openpassport/zk-kit-imt';
+import { pad } from './passports/passport';
+
+export async function fetchTreeFromUrl(url: string): Promise<LeanIMT> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const commitmentMerkleTree = await response.json();
+  console.log('\x1b[90m%s\x1b[0m', 'commitment merkle tree: ', commitmentMerkleTree);
+  const tree = LeanIMT.import((a, b) => poseidon2([a, b]), commitmentMerkleTree);
+  return tree;
+}
+
+/** get leaf for DSC and CSCA Trees */
+export function getLeaf(parsed: CertificateData, type: 'dsc' | 'csca'): string {
+  if (type === 'dsc') {
+    // for now, we pad it for sha
+    const [paddedTbsBytes, tbsBytesPaddedLength] = pad(parsed.hashAlgorithm)(
+      parsed.tbsBytes,
+      max_dsc_bytes
+    );
+    const dsc_hash = packBytesAndPoseidon(Array.from(paddedTbsBytes));
+    return poseidon2([dsc_hash, parsed.tbsBytes.length]).toString();
+  } else {
+    const tbsBytesArray = Array.from(parsed.tbsBytes);
+    const paddedTbsBytesArray = tbsBytesArray.concat(new Array(max_csca_bytes - tbsBytesArray.length).fill(0));
+    const csca_hash = packBytesAndPoseidon(paddedTbsBytesArray);
+    return poseidon2([csca_hash, tbsBytesArray.length]).toString();
+  }
+}
+
+
+export function getLeafDscTreeFromDscCertificateMetadata(dscParsed: CertificateData, dscMetaData: DscCertificateMetaData): string {
+  const cscaParsed = parseCertificateSimple(dscMetaData.csca);
+  return getLeafDscTree(dscParsed, cscaParsed);
+}
+
+export function getLeafDscTreeFromParsedDsc(dscParsed: CertificateData): string {
+  return getLeafDscTreeFromDscCertificateMetadata(dscParsed, parseDscCertificateData(dscParsed));
+}
+
+export function getLeafDscTree(dsc_parsed: CertificateData, csca_parsed: CertificateData): string {
+  const dscLeaf = getLeaf(dsc_parsed, 'dsc');
+  const cscaLeaf = getLeaf(csca_parsed, 'csca');
+  return poseidon2([dscLeaf, cscaLeaf]).toString();
+}
+
+export function getLeafCscaTree(csca_parsed: CertificateData): string {
+  return getLeaf(csca_parsed, 'csca');
+}
+
+/*** get inclusion proofs for DSC and CSCA Trees ***/
+export function getTreeInclusionProof(leaf: string, type: 'csca' | 'dsc') {
+  switch (type) {
+    case 'csca':
+      return getCscaTreeInclusionProof(leaf);
+    case 'dsc':
+      return getDscTreeInclusionProof(leaf);
+    default:
+      throw new Error('Invalid tree type');
+  }
+}
+function getDscTreeInclusionProof(leaf: string): [string, number[], bigint[], number] {
+  const hashFunction = (a: any, b: any) => poseidon2([a, b]);
+  const tree = LeanIMT.import(hashFunction, serialized_dsc_tree);
+  const index = tree.indexOf(BigInt(leaf));
+  if (index === -1) {
+    throw new Error('Your public key was not found in the registry');
+  }
+  const { siblings, path, leaf_depth } = generateMerkleProof(tree, index, DSC_TREE_DEPTH);
+  return [tree.root, path, siblings, leaf_depth];
+}
+
+function getCscaTreeInclusionProof(leaf: string) {
+  let tree = new IMT(poseidon2, CSCA_TREE_DEPTH, 0, 2);
+  tree.setNodes(serialized_csca_tree);
+  const index = tree.indexOf(leaf);
+  if (index === -1) {
+    throw new Error('Your public key was not found in the registry');
+  }
+  const proof = tree.createProof(index);
+  return [tree.root, proof.pathIndices.map(index => index.toString()), proof.siblings.flat().map(sibling => sibling.toString())];
+}
+export function getCscaTreeRoot() {
+  let tree = new IMT(poseidon2, CSCA_TREE_DEPTH, 0, 2);
+  tree.setNodes(serialized_csca_tree);
+  return tree.root;
+}
+
 
 
 export function formatRoot(root: string): string {
@@ -11,7 +111,7 @@ export function formatRoot(root: string): string {
 
 export function generateSMTProof(smt: SMT, leaf: bigint) {
   const { entry, matchingEntry, siblings, root, membership } = smt.createProof(leaf);
-  const depth = siblings.length;
+  const leaf_depth = siblings.length;
 
   let closestleaf;
   if (!matchingEntry) {
@@ -34,16 +134,16 @@ export function generateSMTProof(smt: SMT, leaf: bigint) {
 
   // ----- Useful for debugging hence leaving as comments -----
   // const binary = entry[0].toString(2)
-  // const bits = binary.slice(-depth);
+  // const bits = binary.slice(-leaf_depth);
   // let indices = bits.padEnd(256, "0").split("").map(Number)
   // const pathToMatch = num2Bits(256,BigInt(entry[0]))
   // while(indices.length < 256) indices.push(0);
   // // CALCULATED ROOT FOR TESTING
-  // // closestleaf, depth, siblings, indices, root : needed
+  // // closestleaf, leaf_depth, siblings, indices, root : needed
   // let calculatedNode = poseidon3([closestleaf,1,1]);
   // console.log("Initial node while calculating",calculatedNode)
   // console.log(smt.verifyProof(smt.createProof(leaf)))
-  // for (let i= 0; i < depth ; i++) {
+  // for (let i= 0; i < leaf_depth ; i++) {
   //   const childNodes: any = indices[i] ? [siblings[i], calculatedNode] : [calculatedNode, siblings[i]]
   //   console.log(indices[i],childNodes)
   //   calculatedNode = poseidon2(childNodes)
@@ -54,28 +154,28 @@ export function generateSMTProof(smt: SMT, leaf: bigint) {
 
   return {
     root,
-    depth,
+    leaf_depth,
     closestleaf,
     siblings,
   };
 }
 
-export function generateMerkleProof(imt: LeanIMT, _index: number, maxDepth: number) {
-  const { siblings: merkleProofSiblings, index } = imt.generateProof(_index);
-  const depthForThisOne = merkleProofSiblings.length;
+export function generateMerkleProof(imt: LeanIMT, _index: number, maxleaf_depth: number) {
+  const { siblings: siblings, index } = imt.generateProof(_index);
+  const leaf_depth = siblings.length;
   // The index must be converted to a list of indices, 1 for each tree level.
-  // The circuit tree depth is 20, so the number of siblings must be 20, even if
-  // the tree depth is actually 3. The missing siblings can be set to 0, as they
+  // The circuit tree leaf_depth is 20, so the number of siblings must be 20, even if
+  // the tree leaf_depth is actually 3. The missing siblings can be set to 0, as they
   // won't be used to calculate the root in the circuit.
-  const merkleProofIndices: number[] = [];
+  const path: number[] = [];
 
-  for (let i = 0; i < maxDepth; i += 1) {
-    merkleProofIndices.push((index >> i) & 1);
-    if (merkleProofSiblings[i] === undefined) {
-      merkleProofSiblings[i] = BigInt(0);
+  for (let i = 0; i < maxleaf_depth; i += 1) {
+    path.push((index >> i) & 1);
+    if (siblings[i] === undefined) {
+      siblings[i] = BigInt(0);
     }
   }
-  return { merkleProofSiblings, merkleProofIndices, depthForThisOne };
+  return { siblings, path, leaf_depth };
 }
 
 

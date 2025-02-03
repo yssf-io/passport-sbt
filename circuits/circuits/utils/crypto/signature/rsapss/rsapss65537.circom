@@ -57,7 +57,7 @@ include "../FpPowMod.circom";
 /// @input signature The RSA signature split into chunks
 /// @input hashed The hash of the original message
 template VerifyRsaPss65537Sig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, HASH_TYPE, KEY_LENGTH) {
-    assert((HASH_TYPE == 384 && SALT_LEN == 48) || (HASH_TYPE == 256 && SALT_LEN == 64) || (HASH_TYPE == 256 && SALT_LEN == 32));
+    assert((HASH_TYPE == 384 && SALT_LEN == 48) || (HASH_TYPE == 256 && SALT_LEN == 64) || (HASH_TYPE == 256 && SALT_LEN == 32) || (HASH_TYPE == 512 && SALT_LEN == 64));
 
     signal input pubkey[CHUNK_NUMBER]; 
     signal input signature[CHUNK_NUMBER];

@@ -11,11 +11,10 @@ describe('DateIsLessChecker Circuit Test', function () {
    *  Test parameters
    *
    *  n: number of dates to test
-   *  majority: age of majority
    *  yearStart: start year for random current dates
    *  yearEnd: end year for random current dates
    *
-   *  According to circuit logic, user has to be majority years and 1 day old to be major
+   *
    *
    */
 
@@ -24,7 +23,6 @@ describe('DateIsLessChecker Circuit Test', function () {
   const yearStart = 2023;
   const yearEnd = 2049;
   const maxDiff = 20; // Maximum date difference
-  const minDiff = -10; // Minimum date for majority
 
   // Helper function to generate a random date within a given range
   function generateRandomDate(yearStart, yearEnd) {
@@ -77,7 +75,7 @@ describe('DateIsLessChecker Circuit Test', function () {
     expect(circuit).to.not.be.undefined;
   });
 
-  describe('Unvlaidity Tests', function () {
+  describe('Unvalidity Tests', function () {
     unvalidExpiryDates.forEach((date, index) => {
       it(`unvalidity check for expiry date ${genDateStr(unvalidExpiryDates[index])} and current date ${genDateStr(currentDates[index])}, expired since: ${getAgeFromDates(unvalidExpiryDates[index], currentDates[index])}`, async function () {
         const inputs = {

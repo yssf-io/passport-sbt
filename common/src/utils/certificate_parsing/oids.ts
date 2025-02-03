@@ -79,6 +79,8 @@ export const oidMap: { [key: string]: string } = {
   '1.2.840.10040.4.3': 'sha1DSA',
   '1.2.840.10045.4.1': 'sha1ECDSA',
   '1.2.840.113549.1.1.5': 'sha1RSA',
+  '1.2.840.10045.4.3.1': 'sha224ECDSA',
+  '1.2.840.113549.1.1.14': 'sha224RSA',
   '2.16.840.1.101.3.4.2.1': 'sha256',
   '1.2.840.10045.4.3.2': 'sha256ECDSA',
   '1.2.840.113549.1.1.11': 'sha256RSA',
@@ -110,6 +112,20 @@ export const mapSecpCurves: { [key: string]: string } = {
   ECDSA_P384: 'secp384r1',
   ECDSA_P521: 'secp521r1',
 };
+
+export function getSecpFromNist(nist: string): string {
+  switch (nist) {
+    case 'nistP224':
+      return 'secp224r1';
+    case 'nistP256':
+      return 'secp256r1';
+    case 'nistP384':
+      return 'secp384r1';
+    case 'nistP521':
+      return 'secp521r1';
+  }
+  return nist;
+}
 
 function getFriendlyNameSecpCurves(friendlyName: string): string {
   return mapSecpCurves[friendlyName] || friendlyName;

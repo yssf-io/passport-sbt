@@ -12,10 +12,12 @@ export interface CertificateData {
   signatureAlgorithm: string;
   hashAlgorithm: string;
   publicKeyDetails:
-    | PublicKeyDetailsRSA
-    | PublicKeyDetailsECDSA
-    | PublicKeyDetailsRSAPSS
-    | undefined;
+  | PublicKeyDetailsRSA
+  | PublicKeyDetailsECDSA
+  | PublicKeyDetailsRSAPSS
+  | undefined;
+  tbsBytes: Uint8Array | undefined;
+  tbsBytesLength: string;
   rawPem: string;
   rawTxt: string;
   publicKeyAlgoOID?: string;

@@ -1,6 +1,6 @@
 import * as asn1js from 'asn1js';
 import { Certificate, RSAPublicKey, RSASSAPSSParams } from 'pkijs';
-import { getFriendlyName } from './oids';
+import { getFriendlyName, getSecpFromNist } from './oids';
 import {
   CertificateData,
   PublicKeyDetailsECDSA,
@@ -26,12 +26,16 @@ export function parseCertificateSimple(pem: string): CertificateData {
     signatureAlgorithm: '',
     hashAlgorithm: '',
     publicKeyDetails: undefined,
+    tbsBytes: undefined,
+    tbsBytesLength: '',
     rawPem: '',
     rawTxt: '',
     publicKeyAlgoOID: '',
   };
   try {
     const cert = getCertificateFromPem(pem);
+    certificateData.tbsBytes = getTBSBytesForge(cert);
+    certificateData.tbsBytesLength = certificateData.tbsBytes.length.toString();
 
     const publicKeyAlgoOID = cert.subjectPublicKeyInfo.algorithm.algorithmId;
     const publicKeyAlgoFN = getFriendlyName(publicKeyAlgoOID);
@@ -153,7 +157,7 @@ export function getParamsECDSA(cert: Certificate): PublicKeyDetailsECDSA {
     // Try to get the curve name from the OID
     if (algorithmParams instanceof asn1js.ObjectIdentifier) {
       const curveOid = algorithmParams.valueBlock.toString();
-      curveName = getFriendlyName(curveOid) || 'Unknown';
+      curveName = getSecpFromNist(getFriendlyName(curveOid)) || 'Unknown';
       bits = getECDSACurveBits(curveName);
     }
 
@@ -310,7 +314,7 @@ export const getCircuitNameOld = (
 
 export function getHashAlgorithm(rawSignatureAlgorithm: string) {
   const input = rawSignatureAlgorithm.toLowerCase();
-  const patterns = [/sha-?1/i, /sha-?256/i, /sha-?384/i, /sha-?512/i];
+  const patterns = [/sha-?1/i, /sha-?224/i, /sha-?256/i, /sha-?384/i, /sha-?512/i];
 
   for (const pattern of patterns) {
     const match = input.match(pattern);
@@ -342,6 +346,11 @@ export function getCertificateFromPem(pemContent: string): Certificate {
 
 export function getTBSBytes(pemContent: string): Uint8Array {
   const certificate = getCertificateFromPem(pemContent);
+  return Uint8Array.from(
+    certificate.tbsView.map((byte) => parseInt(byte.toString(16), 16))
+  );
+}
+export function getTBSBytesForge(certificate: Certificate): Uint8Array {
   return Uint8Array.from(
     certificate.tbsView.map((byte) => parseInt(byte.toString(16), 16))
   );

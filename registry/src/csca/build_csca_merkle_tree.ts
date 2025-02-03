@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { getLeafCSCA } from '../../../common/src/utils/pubkeyTree';
+import { getLeafCscaTree } from '../../../common/src/utils/trees';
 import { CSCA_TREE_DEPTH, DEVELOPMENT_MODE } from '../../../common/src/constants/constants';
 import { IMT } from '@openpassport/zk-kit-imt';
 import { poseidon2 } from 'poseidon-lite';
@@ -7,9 +7,20 @@ import { writeFile } from 'fs/promises';
 import * as path from 'path';
 import { parseCertificate } from '../../../common/src/utils/certificate_parsing/parseCertificate';
 
+let tbs_max_bytes = 0;
+let key_length_max_bytes = 0;
+const countryKeyBitLengths: { [countryCode: string]: number } = {};
+
+
 function processCertificate(pemContent: string, filePath: string) {
     try {
         const certificate = parseCertificate(pemContent, path.basename(filePath));
+        if (parseInt(certificate.tbsBytesLength) > tbs_max_bytes) {
+            tbs_max_bytes = parseInt(certificate.tbsBytesLength);
+        }
+        if (parseInt(certificate.publicKeyDetails.bits) > key_length_max_bytes) {
+            key_length_max_bytes = parseInt(certificate.publicKeyDetails.bits);
+        }
         const validAlgorithms = ['rsa', 'rsapss', 'ecdsa'];
         if (!validAlgorithms.includes(certificate.signatureAlgorithm)) {
             console.log(`Skipping file ${filePath}: Unsupported signature algorithm ${certificate.signatureAlgorithm}`);
@@ -23,6 +34,7 @@ function processCertificate(pemContent: string, filePath: string) {
 
         const keyLength = parseInt(certificate.publicKeyDetails.bits);
         if (keyLength > 4096) {
+            countryKeyBitLengths[certificate.issuer] = keyLength;
             console.log(`Skipping file ${filePath}: Key length ${keyLength} bits exceeds 4096 bits`);
             return null;
         }
@@ -32,7 +44,7 @@ function processCertificate(pemContent: string, filePath: string) {
         console.log(`Signature Algorithm: ${certificate.signatureAlgorithm}`);
         console.log(`Hash Algorithm: ${certificate.hashAlgorithm}`);
 
-        const finalPoseidonHash = getLeafCSCA(pemContent);
+        const finalPoseidonHash = getLeafCscaTree(certificate);
         console.log(`Final Poseidon Hash: ${finalPoseidonHash}`);
 
         return finalPoseidonHash.toString();
@@ -45,17 +57,19 @@ function processCertificate(pemContent: string, filePath: string) {
 async function buildCscaMerkleTree() {
     const tree = new IMT(poseidon2, CSCA_TREE_DEPTH, 0, 2);
 
-    const path_to_pem_files = "outputs/csca/pem_masterlist";
-    for (const file of fs.readdirSync(path_to_pem_files)) {
-        const file_path = path.join(path_to_pem_files, file);
-        try {
-            const pemContent = fs.readFileSync(file_path, 'utf8');
-            const leafValue = processCertificate(pemContent, file_path);
-            if (leafValue) {
-                tree.insert(leafValue);
+    if (!DEVELOPMENT_MODE) {
+        const path_to_pem_files = "outputs/csca/pem_masterlist";
+        for (const file of fs.readdirSync(path_to_pem_files)) {
+            const file_path = path.join(path_to_pem_files, file);
+            try {
+                const pemContent = fs.readFileSync(file_path, 'utf8');
+                const leafValue = processCertificate(pemContent, file_path);
+                if (leafValue) {
+                    tree.insert(leafValue);
+                }
+            } catch (error) {
+                console.error(`Error reading file ${file}:`, error);
             }
-        } catch (error) {
-            console.error(`Error reading file ${file}:`, error);
         }
     }
 
@@ -95,6 +109,9 @@ async function buildCscaMerkleTree() {
         }
     }
 
+    console.log('\x1b[34m%s\x1b[0m', `Max TBS bytes: ${tbs_max_bytes}`);
+    console.log('\x1b[34m%s\x1b[0m', `Max Key Length: ${key_length_max_bytes}`);
+    console.log('\x1b[34m%s\x1b[0m', 'js: countryKeyBitLengths', countryKeyBitLengths);
     return tree;
 }
 
