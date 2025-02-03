@@ -30,10 +30,31 @@ template verifyECDSABits(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, ALGO){
         }
         hashedChunked[CHUNK_NUMBER - 1 - i] <== bits2Num[i].out;
     }
+
+    signal one[CHUNK_NUMBER]; 
+    one[0] <== 1;
+    for (var i = 1; i < CHUNK_NUMBER; i++){
+        one[i] <== 0; 
+    }
     
     component getOrder = EllipicCurveGetOrder(CHUNK_SIZE,CHUNK_NUMBER, A, B, P);
     signal order[CHUNK_NUMBER];
     order <== getOrder.order;
+
+    // check if 1 <= r < order
+    component rangeChecks[2]; 
+    rangeChecks[0] = BigRangeCheck(CHUNK_SIZE, CHUNK_NUMBER);
+    rangeChecks[0].value <== signature[0]; 
+    rangeChecks[0].lowerBound <== one;
+    rangeChecks[0].upperBound <== order;
+    rangeChecks[0].out === 1;
+
+    //check if 1 <= s < order
+    rangeChecks[1] = BigRangeCheck(CHUNK_SIZE, CHUNK_NUMBER);
+    rangeChecks[1].value <== signature[1]; 
+    rangeChecks[1].lowerBound <== one;
+    rangeChecks[1].upperBound <== order;
+    rangeChecks[1].out === 1;
     
     // s_inv = s ^ -1 mod n
     signal sinv[CHUNK_NUMBER];
@@ -69,9 +90,14 @@ template verifyECDSABits(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, ALGO){
     component add = EllipticCurveAdd(CHUNK_SIZE, CHUNK_NUMBER, A, B, P);
     add.in1 <== scalarMult1.out;
     add.in2 <== scalarMult2.out;
+
+    component addModN = BigMultModP(CHUNK_SIZE, CHUNK_NUMBER, CHUNK_NUMBER, CHUNK_NUMBER);
+    addModN.in1 <== add.out[0];
+    addModN.in2 <== one;
+    addModN.modulus <== order;
     
     // x1 === r
     for (var i = 0; i < CHUNK_NUMBER; i++){
-        add.out[0][i] === signature[0][i];
+        addModN.mod[i] === signature[0][i];
     }
 }

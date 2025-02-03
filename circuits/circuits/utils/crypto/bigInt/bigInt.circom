@@ -40,8 +40,8 @@ template BigMultModP(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS, CHUNK_
     
     for (var i = 0; i < CHUNK_NUMBER_DIV; i++){
         div[i] <-- long_division[0][i];
-
     }
+
     component modChecks[CHUNK_NUMBER_MODULUS];
     for (var i = 0; i < CHUNK_NUMBER_MODULUS; i++){
         mod[i] <-- long_division[1][i];
@@ -79,6 +79,36 @@ template BigMultModP(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS, CHUNK_
     }
 }
 
+// in[0] < in[1]
+template BigLessThan(CHUNK_SIZE, CHUNK_NUMBER){
+    signal input in[2][CHUNK_NUMBER];
+    
+    signal output out;
+    
+    component lessThan[CHUNK_NUMBER];
+    component isEqual[CHUNK_NUMBER - 1];
+    signal result[CHUNK_NUMBER - 1];
+    for (var i = 0; i < CHUNK_NUMBER; i++){
+        lessThan[i] = LessThan(CHUNK_SIZE);
+        lessThan[i].in[0] <== in[0][i];
+        lessThan[i].in[1] <== in[1][i];
+        
+        if (i != 0){
+            isEqual[i - 1] = IsEqual();
+            isEqual[i - 1].in[0] <== in[0][i];
+            isEqual[i - 1].in[1] <== in[1][i];
+        }
+    }
+    
+    for (var i = 1; i < CHUNK_NUMBER; i++){
+        if (i == 1){
+            result[i - 1] <== lessThan[i].out + isEqual[i - 1].out * lessThan[i - 1].out;
+        } else {
+            result[i - 1] <== lessThan[i].out + isEqual[i - 1].out * result[i - 2];
+        }
+    }
+    out <== result[CHUNK_NUMBER - 2];
+}
 
 // in[0] <= in[1]
 template BigLessEqThan(CHUNK_SIZE, CHUNK_NUMBER){
@@ -100,7 +130,7 @@ template BigLessEqThan(CHUNK_SIZE, CHUNK_NUMBER){
     }
     
     for (var i = 0; i < CHUNK_NUMBER; i++){
-    if (i == 0){
+        if (i == 0){
             result[i] <== lessThan[i].out + isEqual[i].out;
         } else {
             result[i] <== lessThan[i].out + isEqual[i].out * result[i - 1];
@@ -108,7 +138,6 @@ template BigLessEqThan(CHUNK_SIZE, CHUNK_NUMBER){
     }
     
     out <== result[CHUNK_NUMBER - 1];
-    
 }
 
 // in[0] > in[1]
@@ -120,6 +149,25 @@ template BigGreaterThan(CHUNK_SIZE, CHUNK_NUMBER){
     component lessEqThan = BigLessEqThan(CHUNK_SIZE, CHUNK_NUMBER);
     lessEqThan.in <== in;
     out <== 1 - lessEqThan.out;
+}
+
+// lowerbound <= value < upperbound
+template BigRangeCheck(CHUNK_SIZE, CHUNK_NUMBER) {
+    signal input value[CHUNK_NUMBER];
+    signal input lowerBound[CHUNK_NUMBER];
+    signal input upperBound[CHUNK_NUMBER];
+
+    signal output out;
+
+    component greaterThanLower = BigLessThan(CHUNK_SIZE, CHUNK_NUMBER);
+    greaterThanLower.in[0] <== value;
+    greaterThanLower.in[1] <== lowerBound;
+
+    component lessThanUpper = BigLessThan(CHUNK_SIZE, CHUNK_NUMBER);
+    lessThanUpper.in[0] <== value;
+    lessThanUpper.in[1] <== upperBound;
+
+    out <== (1 - greaterThanLower.out) * lessThanUpper.out;
 }
 
 // calculates in ^ (-1) % modulus;
